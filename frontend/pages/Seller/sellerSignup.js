@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import { useState } from 'react';
-import * as style from '../../styles/signup.module.css';
+import * as checks from '../../components/LoginCheck';
+import api from '../api';
 
 function SellerSignup() {
+	const [name, setName] = useState('');
+	const [email, setEmail] = useState('');
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 
@@ -12,24 +15,48 @@ function SellerSignup() {
 	}
 
 	function securityCheck() {
-		myTrim();
-		const lengthChecked = checks.lengthCheck(username, password);
-		if (lengthChecked[0]) {
-			const usernameChecked = checks.usernameCheck(username);
-			if (usernameChecked[0]) {
-				const passwordChecked = checks.passwordCheck(password);
-				if (passwordChecked[0]) {
-					console.log(username);
-					console.log(password);
-				} else {
-					console.log(passwordChecked[1]);
-				}
-			} else {
-				console.log(usernameChecked[1]);
-			}
-		} else {
-			console.log(lengthChecked[1]);
-		}
+		const body = {
+			user_name: 'PraphullBoy56',
+			email_id: 'praphull.pd@gmail.com',
+		};
+		console.log(JSON.stringify(body));
+		fetch(`${api}/signup/seller`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Header': '*',
+			},
+			body: JSON.stringify(body),
+		})
+			.then((res) => res.json())
+			.then((res) => console.log(res));
+		// myTrim();
+		// const lengthChecked = checks.lengthCheck(username, password);
+		// if (lengthChecked[0]) {
+		// 	const usernameChecked = checks.usernameCheck(username);
+		// 	if (usernameChecked[0]) {
+		// 		const passwordChecked = checks.passwordCheck(password);
+		// 		if (passwordChecked[0]) {
+		// 			const body = { user_name: username, email: email };
+		// 			fetch(`${api}/signup/seller`, {
+		// 				method: 'POST',
+		// 				headers: {
+		// 					'Content-Type': 'application/json',
+		// 				},
+		// 				body: JSON.stringify(body),
+		// 			})
+		// 				.then((res) => res.json())
+		// 				.then((res) => console.log(res));
+		// 		} else {
+		// 			console.log(passwordChecked[1]);
+		// 		}
+		// 	} else {
+		// 		console.log(usernameChecked[1]);
+		// 	}
+		// } else {
+		// 	console.log(lengthChecked[1]);
+		// }
 	}
 
 	return (
@@ -44,6 +71,8 @@ function SellerSignup() {
 							type='text'
 							id='name'
 							name='name'
+							value={name}
+							onChange={(e) => setName(e.target.value)}
 						/>
 					</div>
 					<div className='inputGroup'>
@@ -53,6 +82,8 @@ function SellerSignup() {
 							type='email'
 							id='email'
 							name='email'
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
 						/>
 					</div>
 					<div className='inputGroup'>
