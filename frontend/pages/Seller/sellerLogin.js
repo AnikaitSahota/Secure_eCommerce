@@ -14,10 +14,6 @@ function SellerLogin() {
 		setPassword(password.trim());
 	}
 
-	function redirectMain() {
-		router.push(`./main`);
-	}
-
 	function securityCheck() {
 		myTrim();
 		const lengthChecked = checks.lengthCheck(username, password);
@@ -26,7 +22,7 @@ function SellerLogin() {
 			if (usernameChecked[0]) {
 				const passwordChecked = checks.passwordCheck(password);
 				if (passwordChecked[0]) {
-					redirectMain();
+					router.push(`/Seller/Product/product`);
 				} else {
 					console.log(passwordChecked[1]);
 				}

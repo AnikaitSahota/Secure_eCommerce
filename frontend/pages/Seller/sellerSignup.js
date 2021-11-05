@@ -8,6 +8,7 @@ function SellerSignup() {
 	const [email, setEmail] = useState('');
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
+	const [phoneNumber, setPhoneNumber] = useState(0);
 
 	function myTrim() {
 		setUsername(username.trim());
@@ -25,7 +26,6 @@ function SellerSignup() {
 			headers: {
 				'Content-Type': 'application/json',
 				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Header': '*',
 			},
 			body: JSON.stringify(body),
 		})
@@ -93,6 +93,8 @@ function SellerSignup() {
 							type='number'
 							id='phoneNumber'
 							name='phoneNumber'
+							value={phoneNumber}
+							onChange={(e) => setPhoneNumber(e.target.value)}
 						/>
 					</div>
 					<div className='inputGroup'>
