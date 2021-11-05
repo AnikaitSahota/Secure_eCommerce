@@ -1,0 +1,94 @@
+html,
+body {
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+	font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+		Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+.link {
+	color: #55aaff;
+}
+
+.link:hover {
+	color: #3388dd;
+}
+
+.inputGroup {
+	width: 100%;
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+}
+
+.inputLabel {
+	display: block;
+	width: 100%;
+}
+
+.input {
+	width: 100%;
+	border: 2px solid #cccccc;
+	border-radius: 0.5rem;
+}
+
+.spaceBetween {
+	display: flex;
+	width: 100%;
+	justify-content: space-between;
+}
+
+.button {
+	width: 100%;
+	background-color: #cccccc;
+	padding: 1rem;
+	border: none;
+	border-radius: 1rem;
+	font-size: 1.4rem;
+	cursor: pointer;
+}
+
+.button:hover {
+	background-color: #aaaaaa;
+}
+
+.submitButton {
+	width: 100%;
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+	padding: 0.5rem;
+	background-color: #3388dd;
+	border: none;
+	border-radius: 1rem;
+	color: #ffffff;
+}
+
+.submitButton:hover {
+	cursor: pointer;
+}
+
+.centerScreenContainer {
+	width: 100%;
+	min-height: 100vh;
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+}
+
+.cell {
+	display: flex;
+	width: 30%;
+	border: 1px solid #cccccc;
+	border-radius: 1rem;
+	padding: 2rem;
+}
