@@ -21,8 +21,8 @@ class SellerAuthenticationView(APIView):
 		# serializer = Login_authenticationSerializer(data=request.data)
 		# if serializer.is_valid():
 
-		print(request.data.keys())
-		print({'user_name' , 'pass_hash'}.issubset(request.data.keys()))
+		# print(request.data.keys())
+		# print({'user_name' , 'pass_hash'}.issubset(request.data.keys()))
 
 		if(not {'user_name' , 'pass_hash'}.issubset(request.data.keys())) :
 			return Response({"status": "error" , "verification_status" : "False"}, status=status.HTTP_400_BAD_REQUEST)
