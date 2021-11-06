@@ -25,14 +25,15 @@ SECRET_KEY = 'django-insecure-6f+m4b2p^)$&((ku##o1$50987s4!wo!lt&5f2n4fvo1!zxub^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*' , 'localhost' , '127.0.0.1']
+ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1']
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'pappu.ki.dukan0noreply@gmail.com' #sender's email-id
-EMAIL_HOST_PASSWORD = 'thisisthepassword' #password associated with above email-id
+EMAIL_HOST_USER = 'pappu.ki.dukan0noreply@gmail.com'  # sender's email-id
+# password associated with above email-id
+EMAIL_HOST_PASSWORD = 'thisisthepassword'
 
 # Application definition
 
@@ -88,14 +89,8 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     "default": {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        # "ENGINE": "django.db.backends.postgresql",
-        # "NAME": "ecommerce",
-        # "USER": "postgres",
-        # "PASSWORD": "$rd>S68R",
-        # "HOST": "0.tcp.ngrok.io",
-        # "PORT": "12124",
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR/"db.sqlite3",
     }
 }
 
