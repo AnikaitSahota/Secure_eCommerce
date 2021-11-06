@@ -8,11 +8,6 @@ from entities import get_OTP
 # from . serializer import *
 # from . models import *
 
-
-# def get_OTP() :
-# 	re
-
-
 class SellerSignUpView(APIView):
 	
 	# serializer_class = Login_authenticationSerializer
@@ -38,14 +33,14 @@ class SellerSignUpView(APIView):
 		return Response({"status": "success", "verification_message" : "OTP verification stage"}, status=status.HTTP_200_OK)
 
 # class SignUpView(APIView):
-	
+
 # 	# serializer_class = Login_authenticationSerializer
-  
+
 # 	# def get(self, request):
-# 	# 	detail = [ {"name": detail.name,"detail": detail.detail} 
+# 	# 	detail = [ {"name": detail.name,"detail": detail.detail}
 # 	# 	for detail in React.objects.all()]
 # 	# 	return Response(detail)
-  
+
 # 	def post(self, request):
 # 		# print(request.data , type(request.data))
 
@@ -55,20 +50,23 @@ class SellerSignUpView(APIView):
 # 		return Response({"status": "success", "verification_tokken" : "random_val"}, status=status.HTTP_200_OK)
 
 
-class BuyerSignUpView(APIView):
-	def post(self, request):
-		if(not {'user_name' , 'email_id'}.issubset(request.data.keys())) :
-			send_mail('verification for pappu ki dukan', '123412 This is your OTP, kindy do shit things with ' , settings.DEFAULT_FROM_EMAIL, [request.email_id])
+class CustomerSignUpView(APIView):
+    def post(self, request):
+        if(not {'user_name', 'email_id'}.issubset(request.data.keys())):
+            send_mail('verification for pappu ki dukan', '123412 This is your OTP, kindy do shit things with ',
+                      settings.DEFAULT_FROM_EMAIL, [request.email_id])
 
-			return Response({"status": "error" , "verification_message" : "OTP verification stage"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "error", "verification_message": "OTP verification stage"}, status=status.HTTP_400_BAD_REQUEST)
 
-		return Response({"status": "success", "verification_message" : "random_val"}, status=status.HTTP_200_OK)
+        return Response({"status": "success", "verification_message": "random_val"}, status=status.HTTP_200_OK)
+
 
 class AdminSignUpView(APIView):
-	def post(self, request):
-		if(not {'user_name' , 'email_id'}.issubset(request.data.keys())) :
-			send_mail('verification for pappu ki dukan', '123412 This is your OTP, kindy do shit things with ' , settings.DEFAULT_FROM_EMAIL, [request.email_id])
+    def post(self, request):
+        if(not {'user_name', 'email_id'}.issubset(request.data.keys())):
+            send_mail('verification for pappu ki dukan', '123412 This is your OTP, kindy do shit things with ',
+                      settings.DEFAULT_FROM_EMAIL, [request.email_id])
 
-			return Response({"status": "error" , "verification_message" : "OTP verification stage"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "error", "verification_message": "OTP verification stage"}, status=status.HTTP_400_BAD_REQUEST)
 
-		return Response({"status": "success", "verification_message" : "random_val"}, status=status.HTTP_200_OK)
+        return Response({"status": "success", "verification_message": "random_val"}, status=status.HTTP_200_OK)

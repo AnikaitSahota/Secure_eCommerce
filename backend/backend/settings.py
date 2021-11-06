@@ -45,7 +45,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    
+    "admins",
+    "sellers",
+    "customers",
+    "products",
 ]
 
 MIDDLEWARE = [
@@ -84,9 +87,15 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    "default": {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        # "ENGINE": "django.db.backends.postgresql",
+        # "NAME": "ecommerce",
+        # "USER": "postgres",
+        # "PASSWORD": "$rd>S68R",
+        # "HOST": "0.tcp.ngrok.io",
+        # "PORT": "12124",
     }
 }
 

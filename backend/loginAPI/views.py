@@ -4,6 +4,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from sellers.models import Seller, Seller_Session
 # from . serializer import *
 # from . models import *
 
@@ -21,15 +22,23 @@ class SellerAuthenticationView(APIView):
 		# serializer = Login_authenticationSerializer(data=request.data)
 		# if serializer.is_valid():
 
-		# print(request.data.keys())
+		print(request.session)
 		# print({'user_name' , 'pass_hash'}.issubset(request.data.keys()))
 
 		if(not {'user_name' , 'pass_hash'}.issubset(request.data.keys())) :
-			return Response({"status": "error" , "verification_status" : "False"}, status=status.HTTP_400_BAD_REQUEST)
+			return Response({"status": "error" , "verification_status" : "False"},
+							status=status.HTTP_400_BAD_REQUEST)
 
-		return Response({"status": "success", "verification_status" : "True"}, status=status.HTTP_200_OK)
+		if (Seller.objects.filter(username=request.data['user_name'], password=request.data['pass_hash'])).exists():
 
-class BuyerAuthenticationView(APIView):
+			return Response({"status": "success", "verification_status": "True"},
+							status=status.HTTP_200_OK)
+
+		return Response({"status": "unsuccessful", "verification_status": "False"},
+                        status=status.HTTP_200_OK)
+
+
+class CustomerAuthenticationView(APIView):
 	def post(self, request):
 		return Response({"status": "success", "verification_status" : "True"}, status=status.HTTP_200_OK)
 
