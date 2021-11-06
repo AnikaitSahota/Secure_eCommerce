@@ -38,6 +38,12 @@ class Wallet(models.Model):
         return self.customer + ": " + self.amount
 
 
+class Customer_OTP(models.Model):
+    email_id = models.CharField(max_length=50)
+    otp = models.CharField(max_length=10)
+    time_of_creation = models.DateTimeField(auto_now_add=True)
+
+
 class Customer_Session(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     token = models.CharField(max_length=100)

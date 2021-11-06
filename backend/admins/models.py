@@ -15,6 +15,12 @@ class Admin(models.Model):
         return self.username
 
 
+class Admin_OTP(models.Model):
+    email_id = models.CharField(max_length=50)
+    otp = models.CharField(max_length=10)
+    time_of_creation = models.DateTimeField(auto_now_add=True)
+
+
 class Admin_Session(models.Model):
     admin = models.ForeignKey(Admin, on_delete=models.CASCADE)
     token = models.CharField(max_length=100)
