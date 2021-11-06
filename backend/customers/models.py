@@ -18,7 +18,7 @@ class Customer(models.Model):
 
 class Order_Details(models.Model):
     product_name = models.CharField(max_length=50)
-    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     description = models.CharField(max_length=500)
     total_amount = models.DecimalField(max_digits=50, decimal_places=2)
@@ -29,16 +29,22 @@ class Order_Details(models.Model):
 
 
 class Wallet(models.Model):
-    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=50, decimal_places=2)
     time_of_creation = models.DateTimeField(auto_now_add=True)
     time_of_modification = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.customer_id
+        return self.customer + ": " + self.amount
+
+
+class Customer_OTP(models.Model):
+    email_id = models.CharField(max_length=50)
+    otp = models.CharField(max_length=10)
+    time_of_creation = models.DateTimeField(auto_now_add=True)
 
 
 class Customer_Session(models.Model):
-    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     token = models.CharField(max_length=100)
     time_of_creation = models.DateTimeField(auto_now_add=True)
