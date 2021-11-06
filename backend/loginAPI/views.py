@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from sellers.models import Seller, Seller_Session
+# from entities import get_tokken
 # from . serializer import *
 # from . models import *
 
@@ -31,7 +32,12 @@ class SellerAuthenticationView(APIView):
 
 		if (Seller.objects.filter(username=request.data['user_name'], password=request.data['pass_hash'])).exists():
 
-			return Response({"status": "success", "verification_status": "True"},
+			tokken = '012345' #get_tokken()
+			seller = Seller.objects.get(username = request.data['user_name'])
+			new_tuple = Seller_Session(seller = seller , token = tokken)
+			new_tuple.save()
+
+			return Response({"status": "success", "verification_status": "True" , "tokken" : tokken},
 							status=status.HTTP_200_OK)
 
 		return Response({"status": "unsuccessful", "verification_status": "False"},
