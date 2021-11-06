@@ -16,6 +16,6 @@ class Admin(models.Model):
 
 
 class Admin_Session(models.Model):
-    admin_id = models.ForeignKey(Admin, on_delete=models.CASCADE)
+    admin = models.ForeignKey(Admin, on_delete=models.CASCADE)
     token = models.CharField(max_length=100)
     time_of_creation = models.DateTimeField(auto_now_add=True)

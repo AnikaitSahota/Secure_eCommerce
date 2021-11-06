@@ -16,6 +16,6 @@ class Seller(models.Model):
 
 
 class Seller_Session(models.Model):
-    seller_id = models.ForeignKey(Seller, on_delete=models.CASCADE)
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
     token = models.CharField(max_length=100)
     time_of_creation = models.DateTimeField(auto_now_add=True)
