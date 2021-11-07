@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from sellers.models import Seller, Seller_Session
-# from entities import get_tokken
+from entities import get_tokken
 # from . serializer import *
 # from . models import *
 
@@ -23,24 +23,24 @@ class SellerAuthenticationView(APIView):
 		# serializer = Login_authenticationSerializer(data=request.data)
 		# if serializer.is_valid():
 
-		print(request.session)
-		# print({'user_name' , 'pass_hash'}.issubset(request.data.keys()))
+		# print(request.session)
+		# print({'username' , 'password'}.issubset(request.data.keys()))
 
-		if(not {'user_name' , 'pass_hash'}.issubset(request.data.keys())) :
-			return Response({"status": "error" , "verification_status" : "False"},
+		if(not {'username' , 'password'}.issubset(request.data.keys())) :
+			return Response({"status": "error"},
 							status=status.HTTP_400_BAD_REQUEST)
 
-		if (Seller.objects.filter(username=request.data['user_name'], password=request.data['pass_hash'])).exists():
+		if (Seller.objects.filter(username=request.data['username'], password=request.data['password'])).exists():
 
-			tokken = '012345' #get_tokken()
-			seller = Seller.objects.get(username = request.data['user_name'])
-			new_tuple = Seller_Session(seller = seller , token = tokken)
+			current_token = get_tokken()
+			seller = Seller.objects.get(username = request.data['username'])
+			new_tuple = Seller_Session(seller = seller , token = current_token)
 			new_tuple.save()
 
-			return Response({"status": "success", "verification_status": "True" , "tokken" : tokken},
+			return Response({"status": "success" , "token" : current_token},
 							status=status.HTTP_200_OK)
 
-		return Response({"status": "unsuccessful", "verification_status": "False"},
+		return Response({"status": "unsuccessful" },
                         status=status.HTTP_200_OK)
 
 
