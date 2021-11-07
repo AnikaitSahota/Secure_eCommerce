@@ -19,6 +19,7 @@ class Seller(models.Model):
 class Seller_OTP(models.Model):
     email_id = models.CharField(max_length=50)
     otp = models.CharField(max_length=10)
+    meta_data = models.CharField(max_length=500)
     time_of_creation = models.DateTimeField(auto_now_add=True)
 
 

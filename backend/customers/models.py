@@ -6,6 +6,7 @@ from django.db import models
 class Customer(models.Model):
     username = models.CharField(max_length=50)
     name = models.CharField(max_length=50)
+    email_id = models.CharField(max_length=50)
     password = models.CharField(max_length=50)
     address = models.CharField(max_length=100)
     contact_number = models.CharField(max_length=50)
@@ -41,6 +42,7 @@ class Wallet(models.Model):
 class Customer_OTP(models.Model):
     email_id = models.CharField(max_length=50)
     otp = models.CharField(max_length=10)
+    meta_data = models.CharField(max_length=500)
     time_of_creation = models.DateTimeField(auto_now_add=True)
 
 
