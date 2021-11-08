@@ -1,17 +1,14 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Product
-from .serializers import ProductSerializer
+from .models import Product, Category
+from .serializers import CategorySerializer
 
 # Create your views here.
 
 
-class ProductsView(APIView):
-    def post(self, request):
-        pass
-
+class AllCategoriesView(APIView):
     def get(self, request):
-        products = Product.objects.all()
-        serializer = ProductSerializer(products, many=True)
+        categories = Category.objects.all()
+        serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)

@@ -1,11 +1,11 @@
 from django.urls import path
-from .views import AllCategoriesView, AllProductsView, SpecificCategoryView , CustomerAuthenticationView , CustomerSignUpView , CustomerOTPverification
-
+from . import views
 urlpatterns = [
-    path('allproducts/', AllProductsView.as_view()),
-    path('allcategories/', AllCategoriesView.as_view()),
-    path('specificcategory/', SpecificCategoryView.as_view()),
-    path('login/', CustomerAuthenticationView.as_view()),
-    path('signup/', CustomerSignUpView.as_view()),
-    path('OTPverification/', CustomerOTPverification.as_view()),
+    path('allproducts/', views.AllProductsView.as_view()),
+    path('allcategories/', views.AllCategoriesView.as_view()),
+    path('specificcategory/', views.SpecificCategoryView.as_view()),
+    path('login/', views.CustomerAuthenticationView.as_view()),
+    path('signup/', views.CustomerSignUpView.as_view()),
+    path('OTPverification/', views.CustomerOTPverification.as_view()),
+    path('buy-product/', views.CustomerOTPverification.as_view()),
 ]

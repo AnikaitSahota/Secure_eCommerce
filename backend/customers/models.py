@@ -4,12 +4,12 @@ from django.db import models
 
 
 class Customer(models.Model):
-    username = models.CharField(max_length=50)
-    name = models.CharField(max_length=50)
+    username = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50, unique=True)
     email_id = models.CharField(max_length=50)
-    password = models.CharField(max_length=50)
+    password = models.CharField(max_length=100)
     address = models.CharField(max_length=100)
-    contact_number = models.CharField(max_length=50)
+    contact_number = models.CharField(max_length=50, unique=True)
     time_of_creation = models.DateTimeField(auto_now_add=True)
     time_of_modification = models.DateTimeField(auto_now=True)
 

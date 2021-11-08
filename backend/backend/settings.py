@@ -36,6 +36,7 @@ EMAIL_HOST_USER = 'pappu.ki.dukan0noreply@gmail.com'  # sender's email-id
 EMAIL_HOST_PASSWORD = 'thisisthepassword'
 
 OTP_TIME_WINDOW = 10
+SESSION_TIME_WINDOW = 24
 # Application definition
 
 INSTALLED_APPS = [
