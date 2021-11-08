@@ -1,14 +1,16 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from products.models import Product, Category, Inventory
-from products.serializers import ProductSerializer, CategorySerializer
-from .models import Customer, Customer_Session, Customer_OTP, Wallet
+from products.models import Product
+from .models import Customer, Customer_Session, Customer_OTP, Order_Details, Wallet
+from .serializers import CustomerSerializer
 from rest_framework import status
 from entities import get_tokken, get_OTP
 from datetime import datetime, timedelta, timezone
+from django.db.models import F
 from django.conf import settings
 import json
+from decimal import Decimal
 from hashlib import sha256
 
 
@@ -26,65 +28,82 @@ def verify_token(customer, request):
 
 class UpdateWallet(APIView):
     def post(self, request):
-        amount = request.data['amount']
-        if (not verify_token(request)):
-            return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
+        print(request.data)
         customer_username = request.data["username"]
         customer = Customer.objects.get(username=customer_username)
+        amount = Decimal(request.data['amount'])
+        if (not verify_token(customer, request)):
+            return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
         customer_wallet = Wallet.objects.get(customer=customer)
-        customer_wallet.amount = amount
+        customer_wallet.amount += amount
+        if (customer_wallet.amount < 0):
+            customer_wallet.amount = 0
         customer_wallet.save()
-        return Response({"status": "success"}, status=status.HTTP_200_OK)
+        return Response({"status": "success", "balance": customer_wallet.amount}, status=status.HTTP_200_OK)
 
 
 class BuyProduct(APIView):
     def post(self, request):
-        if (not verify_token(request)):
-            return Response({"status": "unsuccessful"}, status=status.HTTP_200_OK)
+        print(request.data)
         customer = Customer.objects.get(username=request.data["username"])
+        if (not verify_token(customer, request)):
+            return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
         product = Product.objects.get(id=request.data['id'])
-        quantity = request.data['quantity']
-        amount = product.price * quantity
-        wallet = Wallet(customer=customer)
-        if (wallet.amount >= amount):
-            inventory = Inventory.objects.get(product_name=product.name)
-            if (inventory.quantity >= quantity):
-                inventory.quantity -= quantity
-                inventory.save()
-                wallet.amount -= amount
+        quantity = int(request.data['quantity'])
+        total_amount = (product.price * quantity)
+        wallet = Wallet.objects.get(customer=customer)
+        wallet_amount = wallet.amount
+        if (wallet_amount >= total_amount):
+            current_quantity = product.inventory
+            if (current_quantity >= quantity):
+                product.inventory = current_quantity - quantity
+                product.save()
+                wallet.amount = wallet_amount - total_amount
                 wallet.save()
-                return Response({"status": "success"}, status=status.HTTP_200_OK)
+                new_order = Order_Details(product_name=product.name,
+                                          customer=customer,
+                                          quantity=quantity,
+                                          description=('Purchased ' + str(quantity) + ' pieces of ' + product.name +
+                                                       ' sold by ' + product.seller.username + ' for $' + str(total_amount)),
+                                          total_amount=total_amount)
+                new_order.save()
+                return Response({"status": "success", "balance": wallet.amount}, status=status.HTTP_200_OK)
             else:
                 return Response({"status": "Insufficient Inventory, Try Again Later"}, status=status.HTTP_200_OK)
         else:
             return Response({"status": "Insufficient Balance, Add balance to your wallet"}, status=status.HTTP_200_OK)
 
 
-class AllProductsView(APIView):
-    def get(self, request):
-        products = Product.objects.all()
-        serializer = ProductSerializer(products, many=True)
-        return Response(serializer.data)
+class GetCustomerDetails(APIView):
+    def post(self, request):
+        print(request.data)
+        customer = Customer.objects.get(username=request.data["username"])
+        if (not verify_token(customer, request)):
+            return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
+        serializer = CustomerSerializer(customer)
+        wallet = Wallet.objects.get(customer=customer)
+        return Response({"status": "success", "data": serializer.data, "balance": wallet.amount}, status=status.HTTP_200_OK)
 
 
-class AllCategoriesView(APIView):
-    def get(self, request):
-        categories = Category.objects.all()
-        serializer = CategorySerializer(categories, many=True)
-        return Response(serializer.data)
-
-
-class SpecificCategoryView(APIView):
-    def get(self, request):
-        category_name = request.data["category_name"]
-        category = Category.objects.get(name=category_name)
-        products = Product.objects.filter(category_id=category.id)
-        serializer = ProductSerializer(products, many=True)
-        return Response(serializer.data)
+class UpdateCustomerDetails(APIView):
+    def put(self, request):
+        print(request.data)
+        seller = Customer.objects.get(username=request.data["username"])
+        if (not verify_token(seller, request)):
+            return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
+        if ('name' in request.data):
+            seller.name = request.data['name']
+        if ('contact_number' in request.data):
+            seller.contact_number = request.data['contact_number']
+        if ('address' in request.data):
+            seller.address = request.data['address']
+        seller.save()
+        return Response({"status": "success"}, status=status.HTTP_200_OK)
 
 
 class CustomerSignUpView(APIView):
     def post(self, request):
+        print(request.data)
         if(not {'username', 'email_id', 'name', 'address',
                 'password', 'contact_number'}.issubset(request.data.keys())):
             return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
@@ -121,13 +140,15 @@ class CustomerSignUpView(APIView):
 
 class CustomerOTPverification(APIView):
     def post(self, request):
+        print(request.data)
         status_msg = 'success'
         if(not {'email_id', 'OTP'}.issubset(request.data.keys())):
             return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            OTP_tuple = Customer_OTP.objects.get(
-                email_id=request.data['email_id'])
+            OTP_tuple = Customer_OTP.objects.filter(
+                email_id=request.data['email_id']).order_by('-time_of_creation')[0]
+            print(OTP_tuple)
             OTP_timestamp = OTP_tuple.time_of_creation
             OTP_metadata = json.loads(OTP_tuple.meta_data)
             if(OTP_tuple.otp == request.data['OTP']):
@@ -140,6 +161,8 @@ class CustomerOTPverification(APIView):
                                             address=OTP_metadata['address'],
                                             contact_number=OTP_metadata['contact_number'])
                     new_customer.save()
+                    wallet = Wallet(customer=new_customer, amount=1000)
+                    wallet.save()
                     return Response({"status": status_msg}, status=status.HTTP_200_OK)
                 else:
                     status_msg = 'OTP has Expired'
@@ -157,7 +180,7 @@ class CustomerOTPverification(APIView):
 
 class CustomerAuthenticationView(APIView):
     def post(self, request):
-
+        print(request.data)
         if(not {'username', 'password'}.issubset(request.data.keys())):
             return Response({"status": "error"},
                             status=status.HTTP_400_BAD_REQUEST)

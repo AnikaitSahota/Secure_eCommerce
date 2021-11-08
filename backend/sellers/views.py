@@ -3,8 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.core.mail import send_mail
 from .models import Seller, Seller_Session, Seller_OTP
-from products.models import Product, Category, Inventory
-from products.serializers import ProductSerializerFew, CategorySerializerFew, ProductSerializer
+from products.models import Product, Category
+from products.serializers import ProductSerializerFew, CategorySerializerFew
 from .serializers import SellerSerializer
 from rest_framework import status
 from entities import get_OTP, get_tokken
@@ -70,9 +70,11 @@ class ViewProduct(APIView):
         product = Product.objects.get(id=request.data['id'])
         product_dict = {'id': product.id,
                         'name': product.name,
+                        'img1': product.img1,
+                        'img2': product.img2,
                         'description': product.description,
                         'category': product.category.name,
-                        'inventory': product.inventory.quantity,
+                        'inventory': product.inventory,
                         'price': str(product.price),
                         }
         serializer = json.dumps(product_dict)
@@ -92,11 +94,13 @@ class EditProduct(APIView):
         if 'description' in request.data:
             product.description = request.data['description']
         if 'inventory' in request.data:
-            inventory = Inventory.objects.get(product_name=product.name)
-            inventory.quantity = request.data['inventory']
-            inventory.save()
+            product.inventory = request.data['inventory']
         if 'price' in request.data:
             product.price = request.data['price']
+        if 'img1' in request.data:
+            product.img1 = request.data['img1']
+        if 'img2' in request.data:
+            product.img2 = request.data['img2']
         product.save()
         return Response({"status": "success"}, status=status.HTTP_200_OK)
 
@@ -123,31 +127,17 @@ class AddProduct(APIView):
         if (not is_verified(seller, request)):
             return Response({"status": "Seller Not Verified"}, status=status.HTTP_200_OK)
         name = request.data['name']
-        try:
-            inventory = Inventory.objects.get(product_name=name)
-            new_product = Product(name=name,
-                                  seller=seller,
-                                  description=request.data['description'],
-                                  category=Category.objects.get(
-                                      name=request.data['category']),
-                                  inventory=inventory,
-                                  price=request.data['price'])
-            new_product.save()
-            return Response({"status": "success"}, status=status.HTTP_200_OK)
-        except Exception as exp:
-            print(exp)
-            new_inventory = Inventory(
-                product_name=name, quantity=request.data['inventory'])
-            new_inventory.save()
-            new_product = Product(name=name,
-                                  seller=seller,
-                                  description=request.data['description'],
-                                  category=Category.objects.get(
-                                      name=request.data['category']),
-                                  inventory=new_inventory,
-                                  price=request.data['price'])
-            new_product.save()
-            return Response({"status": "success"}, status=status.HTTP_200_OK)
+        new_product = Product(name=name,
+                              img1=request.data['img1'],
+                              img2=request.data['img2'],
+                              seller=seller,
+                              description=request.data['description'],
+                              category=Category.objects.get(
+                                  name=request.data['category']),
+                              inventory=request.data['inventory'],
+                              price=request.data['price'])
+        new_product.save()
+        return Response({"status": "success"}, status=status.HTTP_200_OK)
 
 
 class GetSellerDetails(APIView):
@@ -212,13 +202,15 @@ class SellerSignUpView(APIView):
 
 class SellerOTPverification(APIView):
     def post(self, request):
+        print(request.data)
         status_msg = 'success'
         if(not {'email_id', 'OTP'}.issubset(request.data.keys())):
             return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            OTP_tuple = Seller_OTP.objects.get(
-                email_id=request.data['email_id'])
+            OTP_tuple = Seller_OTP.objects.filter(
+                email_id=request.data['email_id']).order_by('-time_of_creation')[0]
+            print(OTP_tuple)
             OTP_timestamp = OTP_tuple.time_of_creation
             OTP_metadata = json.loads(OTP_tuple.meta_data)
             if(OTP_tuple.otp == request.data['OTP']):

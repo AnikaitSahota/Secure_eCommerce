@@ -1,19 +1,13 @@
 from rest_framework import serializers
-from .models import Product, Category, Inventory
+from .models import Product, Category
 
 
 class ProductSerializerFew(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = (
-            'id', "name", "description"
+            'id', "name", "description", 'img1'
         )
-
-
-class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = '__all__'
 
 
 class CategorySerializerFew(serializers.ModelSerializer):
@@ -21,12 +15,4 @@ class CategorySerializerFew(serializers.ModelSerializer):
         model = Category
         fields = (
             "name",
-        )
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = (
-            "name", "description"
         )

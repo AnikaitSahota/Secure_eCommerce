@@ -26,7 +26,7 @@ class Order_Details(models.Model):
     time_of_creation = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.time_of_creation + ": " + self.total_amount
+        return str(self.time_of_creation) + ": " + str(self.total_amount)
 
 
 class Wallet(models.Model):
@@ -36,7 +36,7 @@ class Wallet(models.Model):
     time_of_modification = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.customer + ": " + self.amount
+        return self.customer.name + ": " + str(self.amount)
 
 
 class Customer_OTP(models.Model):

@@ -4,7 +4,7 @@ from rest_framework import serializers, status
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import Admin, Admin_Session, Admin_OTP
-from products.models import Category
+from products.models import Category, Product
 from entities import get_tokken, get_OTP
 from datetime import datetime, timedelta, timezone
 from .serializers import AdminSerializer
@@ -26,7 +26,6 @@ def verify_token(admin, request):
     for session in admin_sessions:
         session_timestamp = session.time_of_creation
         if ((front_token == session.token) and ((datetime.now(timezone.utc) - session_timestamp) <= timedelta(hours=settings.SESSION_TIME_WINDOW))):
-            print(True)
             return True
     return False
 # Create your views here.
@@ -87,6 +86,32 @@ class AddCategory(APIView):
         return Response({"status": "success"}, status=status.HTTP_200_OK)
 
 
+class DeleteCategory(APIView):
+    def post(self, request):
+        print(request.data)
+        admin = Admin.objects.get(username=request.data["username"])
+        if (not verify_token(admin, request)):
+            return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
+        if (not is_verified(admin, request)):
+            return Response({"status": "Admin Not Verified"}, status=status.HTTP_200_OK)
+        category = Category.objects.get(name=request.data['category_name'])
+        category.delete()
+        return Response({"status": "success"}, status=status.HTTP_200_OK)
+
+
+class DeleteProduct(APIView):
+    def post(self, request):
+        print(request.data)
+        admin = Admin.objects.get(username=request.data["username"])
+        if (not verify_token(admin, request)):
+            return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
+        if (not is_verified(admin, request)):
+            return Response({"status": "Admin Not Verified"}, status=status.HTTP_200_OK)
+        product = Product.objects.get(id=request.data['id'])
+        product.delete()
+        return Response({"status": "success"}, status=status.HTTP_200_OK)
+
+
 class GetAdminDetails(APIView):
     def post(self, request):
         print(request.data)
@@ -113,6 +138,7 @@ class UpdateAdminDetails(APIView):
 
 class AdminSignUpView(APIView):
     def post(self, request):
+        print(request.data)
         if(not {'username', 'email_id', 'name',
                 'password', 'contact_number'}.issubset(request.data.keys())):
             return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
@@ -149,13 +175,15 @@ class AdminSignUpView(APIView):
 
 class AdminOTPverification(APIView):
     def post(self, request):
+        print(request.data)
         status_msg = 'success'
         if(not {'email_id', 'OTP'}.issubset(request.data.keys())):
             return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            OTP_tuple = Admin_OTP.objects.get(
-                email_id=request.data['email_id'])
+            OTP_tuple = Admin_OTP.objects.filter(
+                email_id=request.data['email_id']).order_by('-time_of_creation')[0]
+            print(OTP_tuple)
             OTP_timestamp = OTP_tuple.time_of_creation
             OTP_metadata = json.loads(OTP_tuple.meta_data)
             if(OTP_tuple.otp == request.data['OTP']):
@@ -185,6 +213,7 @@ class AdminOTPverification(APIView):
 
 class AdminAuthenticationView(APIView):
     def post(self, request):
+        print(request.data)
         if(not {'username', 'password'}.issubset(request.data.keys())):
             return Response({"status": "error"},
                             status=status.HTTP_400_BAD_REQUEST)
