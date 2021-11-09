@@ -52,7 +52,6 @@ function AdminSellerCard({ name, verified, username, phone, email }) {
 					}
 				} else {
 					alert('Unable to verify');
-					console.log('Unable to verify');
 				}
 			});
 	}
@@ -82,7 +81,6 @@ function AdminSellerCard({ name, verified, username, phone, email }) {
 					}
 				} else {
 					alert('Unable to Delete');
-					console.log('Unable to Delete');
 				}
 			});
 	}

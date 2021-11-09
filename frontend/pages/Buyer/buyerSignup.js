@@ -58,15 +58,12 @@ function BuyerSignup() {
 						});
 				} else {
 					alert(passwordChecked[1]);
-					console.log(passwordChecked[1]);
 				}
 			} else {
 				alert(usernameChecked[1]);
-				console.log(usernameChecked[1]);
 			}
 		} else {
 			alert(lengthChecked[1]);
-			console.log(lengthChecked[1]);
 		}
 	}
 

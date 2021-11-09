@@ -63,7 +63,6 @@ function SellerCategoryAccount() {
 					{category_name}
 				</h1>
 				{products.map((e, i) => {
-					console.log(e);
 					return (
 						<SellerProductCard
 							key={i}
