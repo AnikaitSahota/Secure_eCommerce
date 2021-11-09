@@ -52,4 +52,4 @@ class Buyer(user) :
 		
 
 
-a = Admin('asjdf' , 'asdf')
+# a = Admin('asjdf' , 'asdf')
