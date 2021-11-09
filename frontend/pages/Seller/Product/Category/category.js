@@ -1,13 +1,12 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import BuyerNavbar from '../../../components/BuyerNavbar';
-import BuyerProductCard from '../../../components/BuyerProductCard';
-import UserCheck from '../../../components/userCheck';
-import api from '../../api';
+import SellerCategoryCard from '../../../../components/SellerCategoryCard';
+import SellerNavbar from '../../../../components/SellerNavbar';
+import api from '../../../api';
 
-function Product() {
+function ProductCategories() {
 	const router = useRouter();
-	const [products, setProducts] = useState([]);
+	const [categories, setCategories] = useState([]);
 	const [token, setToken] = useState('');
 	const [type, setType] = useState('');
 	const [username, setUsername] = useState('');
@@ -24,16 +23,23 @@ function Product() {
 			setToken(tokenTemp);
 			setType(typeTemp);
 			setUsername(usernameTemp);
-			if (typeTemp !== 'buyer') {
+			if (typeTemp !== 'seller') {
 				router.push('/');
 			}
 		}
 
-		fetch(`${api}/product/all-products/`)
+		const body = { token: tokenTemp, username: usernameTemp };
+		fetch(`${api}/seller/get-categories/`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(body),
+		})
 			.then((res) => res.json())
 			.then((res) => {
 				if (res.status == 'success') {
-					setProducts(res.data);
+					setCategories(res.data);
 				} else {
 					alert(res.status);
 				}
@@ -42,22 +48,14 @@ function Product() {
 
 	return (
 		<div>
-			<BuyerNavbar />
+			<SellerNavbar />
 			<div className='content'>
-				{products.map((e, i) => {
-					return (
-						<BuyerProductCard
-							key={i}
-							productName={e.name}
-							productDescription={e.description}
-							productId={e.id}
-							productImg1={e.img1}
-						/>
-					);
+				{categories.map((e, i) => {
+					return <SellerCategoryCard categoryName={e.name} key={i} />;
 				})}
 			</div>
 		</div>
 	);
 }
 
-export default Product;
+export default ProductCategories;

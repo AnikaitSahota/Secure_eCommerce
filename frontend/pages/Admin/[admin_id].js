@@ -1,19 +1,16 @@
-import router from 'next/router';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import BuyerNavbar from '../../components/BuyerNavbar';
+import AdminNavbar from '../../components/AdminNavbar';
 import api from '../api';
 
-function BuyerAccount() {
+function AdminAccount() {
+	const router = useRouter();
 	const [name, setName] = useState('');
 	const [email, setEmail] = useState('');
 	const [username, setUsername] = useState('');
 	const [phoneNumber, setPhoneNumber] = useState('');
-	const [address, setAddress] = useState('');
 	const [editable, setEditable] = useState(true);
-
-	const [balance, setBalance] = useState(0);
-	const [newBalance, setNewBalance] = useState(0);
-	const [addShow, setAddShow] = useState(false);
+	const [user, setUser] = useState({});
 	const [token, setToken] = useState('');
 	const [type, setType] = useState('');
 	const [usernameCurr, setUsernameCurr] = useState('');
@@ -30,13 +27,13 @@ function BuyerAccount() {
 			setToken(tokenTemp);
 			setType(typeTemp);
 			setUsernameCurr(usernameTemp);
-			if (typeTemp !== 'buyer') {
+			if (typeTemp !== 'admin') {
 				router.push('/');
 			}
 		}
 
 		const body = { token: tokenTemp, username: usernameTemp };
-		fetch(`${api}/customer/get-customer-details/`, {
+		fetch(`${api}/admin/get-admin-details/`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -46,21 +43,22 @@ function BuyerAccount() {
 			.then((res) => res.json())
 			.then((res) => {
 				if (res.status == 'success') {
-					setName(res.data.name);
-					setEmail(res.data.email_id);
-					setUsername(res.data.username);
-					setPhoneNumber(res.data.contact_number);
-					setAddress(res.data.address);
-					setBalance(res.balance);
+					setUser(res.data);
 				} else {
 					alert(res.status);
 				}
 			});
 	}, []);
 
+	useEffect(() => {
+		setUsername(user.username);
+		setEmail(user.email_id);
+		setPhoneNumber(user.contact_number);
+		setName(user.name);
+	}, [user]);
+
 	function myTrim() {
 		setUsername(username.trim());
-		setAddress(address.trim());
 		setName(name.trim());
 		setPhoneNumber(phoneNumber.trim());
 		setEmail(email.trim());
@@ -68,15 +66,14 @@ function BuyerAccount() {
 
 	function securityCheck() {
 		myTrim();
-		console.log('updated info');
 		const body = {
-			token: token,
-			username: usernameCurr,
 			name: name,
-			address: address,
 			contact_number: phoneNumber,
+			token: token,
+			username: username,
 		};
-		fetch(`${api}/customer/update-customer-details/`, {
+		console.log(JSON.stringify(body));
+		fetch(`${api}/admin/update-admin-details/`, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
@@ -85,51 +82,23 @@ function BuyerAccount() {
 		})
 			.then((res) => res.json())
 			.then((res) => {
+				console.log(res);
 				if (res.status == 'success') {
-					alert('Information Updated successfully');
+					setEditable((prev) => !prev);
 				} else {
 					alert(res.status);
+					console.log('Unable to Update');
 				}
 			});
-		setEditable((prev) => !prev);
 	}
 
 	function makeEdits() {
 		setEditable((prev) => !prev);
 	}
 
-	function showAddBalance() {
-		setAddShow((prev) => !prev);
-	}
-
-	function addBalance() {
-		const body = {
-			token: token,
-			username: usernameCurr,
-			amount: newBalance,
-		};
-		fetch(`${api}/customer/update-wallet/`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(body),
-		})
-			.then((res) => res.json())
-			.then((res) => {
-				if (res.status == 'success') {
-					setBalance(res.balance);
-					alert('Balance Updated Successfully');
-					setAddShow((prev) => !prev);
-				} else {
-					alert(res.status);
-				}
-			});
-	}
-
 	function logout() {
 		const body = { token: token, username: usernameCurr };
-		fetch(`${api}/customer/logout/`, {
+		fetch(`${api}/admin/logout/`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -169,34 +138,14 @@ function BuyerAccount() {
 		}
 	}, [editable]);
 
-	useEffect(() => {
-		const temp = document.getElementsByClassName('newAmount');
-		for (let i = 0; i < temp.length; i++) {
-			if (addShow) {
-				temp[i].style.display = 'block';
-			} else {
-				temp[i].style.display = 'none';
-			}
-		}
-
-		const button = document.getElementById('addBalance');
-		if (!addShow) {
-			button.style.display = 'block';
-		} else {
-			button.style.display = 'none';
-		}
-
-		setNewBalance(0);
-	}, [addShow]);
-
 	return (
 		<div>
-			<BuyerNavbar />
+			<AdminNavbar />
 			<div className='centerScreenContainer'>
 				<div className='cell'>
 					<div style={{ width: '100%' }}>
 						<div className='flex_between'>
-							<h2>Customer Information</h2>
+							<h2>Admin Information</h2>
 							<h3
 								onClick={makeEdits}
 								id='edit'
@@ -253,63 +202,31 @@ function BuyerAccount() {
 								onChange={(e) => setUsername(e.target.value)}
 							/>
 						</div>
-						<div className='inputGroup'>
-							<label className='inputLabel'>Address</label>
-							<textarea
-								className='input'
-								id='address'
-								name='address'
-								disabled={editable}
-								value={address}
-								onChange={(e) => setAddress(e.target.value)}
-							/>
-						</div>
+						<h3>
+							You are{' '}
+							{user.verified ? 'Verified' : 'Not Verified'}
+						</h3>
 						<button
 							className='submitButton'
+							id='submit'
 							onClick={(e) => {
 								e.preventDefault;
 								securityCheck();
 							}}
-							id='submit'
 						>
 							Submit
 						</button>
+						<button
+							className='logoutButton'
+							onClick={(e) => logout()}
+						>
+							Logout
+						</button>
 					</div>
-				</div>
-				<div className='cell'>
-					<h3 style={{ width: '100%' }}>Balance : {balance}</h3>
-					<div className={['inputGroup', 'newAmount'].join(' ')}>
-						<label className='inputLabel'>Enter Amount</label>
-						<input
-							className='input'
-							type='number'
-							id='newBalance'
-							name='newBalance'
-							value={newBalance}
-							onChange={(e) => setNewBalance(e.target.value)}
-						/>
-					</div>
-					<button
-						className='addBalance'
-						id='addBalance'
-						onClick={(e) => showAddBalance()}
-					>
-						Add Balance
-					</button>
-					<button
-						className={['addBalance', 'newAmount'].join(' ')}
-						onClick={(e) => addBalance()}
-						id={'submit'}
-					>
-						Submit Balance
-					</button>
-				</div>
-				<div className='logoutButton' onClick={(e) => logout()}>
-					Logout
 				</div>
 			</div>
 		</div>
 	);
 }
 
-export default BuyerAccount;
+export default AdminAccount;

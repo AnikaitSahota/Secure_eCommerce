@@ -3,109 +3,40 @@ import { useEffect, useState } from 'react';
 import SellerNavbar from '../../../components/SellerNavbar';
 import api from '../../api';
 
-function Product({ props }) {
+function AddProduct() {
 	const router = useRouter();
-	const { product_id } = router.query;
 	const [name, setName] = useState('');
 	const [description, setDescription] = useState('');
 	const [category, setCategory] = useState('');
-	const [quantity, setQuantity] = useState(0);
+	const [quantity, setQuantity] = useState(1);
 	const [price, setPrice] = useState(0);
 	const [img1, setImg1] = useState('');
 	const [img2, setImg2] = useState('');
-	const [editable, setEditable] = useState(true);
 	const [categories, setCategories] = useState([]);
-	const [isFirstRender, setFirstRender] = useState(true);
 	const [token, setToken] = useState('');
 	const [type, setType] = useState('');
 	const [username, setUsername] = useState('');
 
 	useEffect(() => {
-		if (isFirstRender && product_id) {
-			setFirstRender(false);
-			const cookie = document.cookie;
-			if (!cookie) {
-				router.push(`/`);
-			} else {
-				var cookies = cookie.split(';');
-				var tokenTemp = cookies[0].split('=')[1];
-				var typeTemp = cookies[1].split('=')[1];
-				var usernameTemp = cookies[2].split('=')[1];
-				setToken(tokenTemp);
-				setType(typeTemp);
-				setUsername(usernameTemp);
-				if (typeTemp !== 'seller') {
-					router.push('/');
-				}
+		const cookie = document.cookie;
+		if (!cookie) {
+			router.push(`/`);
+		} else {
+			var cookies = cookie.split(';');
+			var tokenTemp = cookies[0].split('=')[1];
+			var typeTemp = cookies[1].split('=')[1];
+			var usernameTemp = cookies[2].split('=')[1];
+			setToken(tokenTemp);
+			setType(typeTemp);
+			setUsername(usernameTemp);
+			if (typeTemp !== 'seller') {
+				router.push('/');
 			}
-
-			const body = { token: tokenTemp, username: usernameTemp };
-			fetch(`${api}/seller/get-categories/`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(body),
-			})
-				.then((res) => res.json())
-				.then((res) => {
-					if (res.status == 'success') {
-						setCategories(res.data);
-					} else {
-						alert(res.status);
-					}
-				});
-
-			const body2 = {
-				token: tokenTemp,
-				username: usernameTemp,
-				id: product_id,
-			};
-			fetch(`${api}/seller/view-product/`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(body2),
-			})
-				.then((res) => res.json())
-				.then((res) => {
-					if (res.status == 'success') {
-						const temp = JSON.parse(res.data);
-						setName(temp.name);
-						setDescription(temp.description);
-						setCategory(temp.category);
-						setQuantity(temp.inventory);
-						setPrice(temp.price);
-						setImg1(temp.img1);
-						setImg2(temp.img2);
-					} else {
-						alert(res.status);
-					}
-				});
 		}
-	});
 
-	function myTrim() {
-		setName((prev) => prev.trim());
-		setDescription((prev) => prev.trim());
-		setCategory((prev) => prev.trim());
-	}
-
-	function securityCheck() {
-		myTrim();
-		const body = {
-			token: token,
-			username: username,
-			id: product_id,
-			description: description,
-			price: price,
-			inventory: quantity,
-			img1: img1,
-			img2: img2,
-		};
-		fetch(`${api}/seller/edit-product/`, {
-			method: 'PUT',
+		const body = { token: tokenTemp, username: usernameTemp };
+		fetch(`${api}/seller/get-categories/`, {
+			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
@@ -114,32 +45,47 @@ function Product({ props }) {
 			.then((res) => res.json())
 			.then((res) => {
 				if (res.status == 'success') {
-					alert('Information Updated');
+					setCategories(res.data);
+					setCategory(res.data[0]);
 				} else {
 					alert(res.status);
 				}
 			});
-		setEditable((prev) => !prev);
+	}, []);
+
+	function myTrim() {
+		setName(name.trim());
+		setDescription(description.trim());
 	}
 
-	useEffect(() => {
-		const submit = document.getElementById('submit');
-		if (editable) {
-			submit.style.display = 'none';
-		} else {
-			submit.style.display = 'block';
-		}
-
-		const edit = document.getElementById('edit');
-		if (!editable) {
-			edit.style.display = 'none';
-		} else {
-			edit.style.display = 'block';
-		}
-	}, [editable]);
-
-	function makeEdits() {
-		setEditable((prev) => !prev);
+	function securityCheck() {
+		myTrim();
+		const body = {
+			token: token,
+			username: username,
+			name: name,
+			description: description,
+			category: category.name,
+			inventory: quantity,
+			price: price,
+			img1: img1,
+			img2: img2,
+		};
+		fetch(`${api}/seller/add-product/`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(body),
+		})
+			.then((res) => res.json())
+			.then((res) => {
+				if (res.status == 'success') {
+					router.push('/Seller/Product/product');
+				} else {
+					alert(res.status);
+				}
+			});
 	}
 
 	return (
@@ -148,16 +94,7 @@ function Product({ props }) {
 			<div className='centerScreenContainer'>
 				<div className='cell'>
 					<div style={{ width: '100%' }}>
-						<div className='flex_between'>
-							<h2>Product Information</h2>
-							<h3
-								onClick={makeEdits}
-								id='edit'
-								style={{ cursor: 'pointer' }}
-							>
-								EDIT
-							</h3>
-						</div>
+						<h2>Add Product</h2>
 						<div className='inputGroup'>
 							<label className='inputLabel'>Product Name</label>
 							<input
@@ -165,7 +102,6 @@ function Product({ props }) {
 								type='text'
 								id='name'
 								name='name'
-								disabled={true}
 								value={name}
 								onChange={(e) => setName(e.target.value)}
 							/>
@@ -175,7 +111,6 @@ function Product({ props }) {
 							<textarea
 								className='input'
 								id='description'
-								disabled={editable}
 								value={description}
 								onChange={(e) => setDescription(e.target.value)}
 							/>
@@ -184,7 +119,6 @@ function Product({ props }) {
 							<label className='inputLabel'>Category</label>
 							<select
 								value={category}
-								disabled={true}
 								onChange={(e) => setCategory(e.target.value)}
 							>
 								{categories.map((e, i) => {
@@ -203,7 +137,6 @@ function Product({ props }) {
 								type='number'
 								id='quantity'
 								name='quantity'
-								disabled={editable}
 								value={quantity}
 								onChange={(e) => setQuantity(e.target.value)}
 							/>
@@ -215,7 +148,6 @@ function Product({ props }) {
 								type='number'
 								id='price'
 								name='price'
-								disabled={editable}
 								value={price}
 								onChange={(e) => setPrice(e.target.value)}
 							/>
@@ -225,7 +157,6 @@ function Product({ props }) {
 							<input
 								className='input'
 								type='text'
-								disabled={editable}
 								value={img1}
 								onChange={(e) => setImg1(e.target.value)}
 							/>
@@ -235,14 +166,12 @@ function Product({ props }) {
 							<input
 								className='input'
 								type='text'
-								disabled={editable}
 								value={img2}
 								onChange={(e) => setImg2(e.target.value)}
 							/>
 						</div>
 						<button
 							className='submitButton'
-							id='submit'
 							onClick={(e) => {
 								e.preventDefault;
 								securityCheck();
@@ -257,4 +186,4 @@ function Product({ props }) {
 	);
 }
 
-export default Product;
+export default AddProduct;

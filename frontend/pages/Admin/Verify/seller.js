@@ -1,13 +1,12 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import BuyerNavbar from '../../../components/BuyerNavbar';
-import BuyerProductCard from '../../../components/BuyerProductCard';
-import UserCheck from '../../../components/userCheck';
+import AdminNavbar from '../../../components/AdminNavbar';
+import AdminSellerCard from '../../../components/AdminSellerCard';
 import api from '../../api';
 
-function Product() {
+function AdminVerifySeller() {
 	const router = useRouter();
-	const [products, setProducts] = useState([]);
+	const [sellers, setSellers] = useState([]);
 	const [token, setToken] = useState('');
 	const [type, setType] = useState('');
 	const [username, setUsername] = useState('');
@@ -24,34 +23,48 @@ function Product() {
 			setToken(tokenTemp);
 			setType(typeTemp);
 			setUsername(usernameTemp);
-			if (typeTemp !== 'buyer') {
+			if (typeTemp !== 'admin') {
 				router.push('/');
 			}
 		}
 
-		fetch(`${api}/product/all-products/`)
+		const body = { token: tokenTemp, username: usernameTemp };
+		fetch(`${api}/admin/get-sellers/`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(body),
+		})
 			.then((res) => res.json())
 			.then((res) => {
 				if (res.status == 'success') {
-					setProducts(res.data);
+					setSellers(res.data);
 				} else {
 					alert(res.status);
 				}
 			});
 	}, []);
 
+	useEffect(() => {}, []);
+
+	useEffect(() => {
+		setSellers((prev) => prev);
+	}, [sellers]);
+
 	return (
 		<div>
-			<BuyerNavbar />
+			<AdminNavbar />
 			<div className='content'>
-				{products.map((e, i) => {
+				{sellers.map((e, i) => {
 					return (
-						<BuyerProductCard
+						<AdminSellerCard
 							key={i}
-							productName={e.name}
-							productDescription={e.description}
-							productId={e.id}
-							productImg1={e.img1}
+							name={e.name}
+							username={e.username}
+							email={e.email_id}
+							phone={e.contact_number}
+							verified={e.verified}
 						/>
 					);
 				})}
@@ -60,4 +73,4 @@ function Product() {
 	);
 }
 
-export default Product;
+export default AdminVerifySeller;

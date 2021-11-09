@@ -1,13 +1,16 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import AdminCategoryCard from '../../../components/AdminCategoryCard';
+import AdminNavbar from '../../../components/AdminNavbar';
+import AdminProductCard from '../../../components/AdminProductCard';
 import BuyerNavbar from '../../../components/BuyerNavbar';
 import BuyerProductCard from '../../../components/BuyerProductCard';
 import UserCheck from '../../../components/userCheck';
 import api from '../../api';
 
-function Product() {
+function Category() {
 	const router = useRouter();
-	const [products, setProducts] = useState([]);
+	const [categories, setCategories] = useState([]);
 	const [token, setToken] = useState('');
 	const [type, setType] = useState('');
 	const [username, setUsername] = useState('');
@@ -24,40 +27,39 @@ function Product() {
 			setToken(tokenTemp);
 			setType(typeTemp);
 			setUsername(usernameTemp);
-			if (typeTemp !== 'buyer') {
+			if (typeTemp !== 'admin') {
 				router.push('/');
 			}
 		}
+	}, []);
 
-		fetch(`${api}/product/all-products/`)
+	useEffect(() => {
+		fetch(`${api}/product/all-categories/`)
 			.then((res) => res.json())
 			.then((res) => {
 				if (res.status == 'success') {
-					setProducts(res.data);
+					setCategories(res.data);
 				} else {
 					alert(res.status);
 				}
 			});
 	}, []);
 
+	useEffect(() => {
+		setCategories((prev) => prev);
+	}, [categories]);
+
 	return (
 		<div>
-			<BuyerNavbar />
+			<AdminNavbar />
 			<div className='content'>
-				{products.map((e, i) => {
-					return (
-						<BuyerProductCard
-							key={i}
-							productName={e.name}
-							productDescription={e.description}
-							productId={e.id}
-							productImg1={e.img1}
-						/>
-					);
+				{categories.map((e, i) => {
+					console.log(e);
+					return <AdminCategoryCard key={i} productName={e.name} />;
 				})}
 			</div>
 		</div>
 	);
 }
 
-export default Product;
+export default Category;

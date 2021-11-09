@@ -77,6 +77,21 @@ a {
 	cursor: pointer;
 }
 
+.cancelButton {
+	width: 100%;
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+	padding: 0.5rem;
+	border: 1px solid #3388dd;
+	background-color: #ffffff;
+	border-radius: 1rem;
+	color: #3388dd;
+}
+
+.cancelButton:hover {
+	cursor: pointer;
+}
+
 .centerScreenContainer {
 	width: 100%;
 	min-height: 100vh;
@@ -86,9 +101,123 @@ a {
 }
 
 .cell {
-	display: flex;
-	width: 30%;
+	min-width: 30%;
 	border: 1px solid #cccccc;
 	border-radius: 1rem;
 	padding: 2rem;
+}
+
+.navbar {
+	width: 100%;
+	padding: 1rem;
+	height: 4rem;
+	display: flex;
+	position: absolute;
+	justify-content: space-around;
+	align-items: center;
+	background-color: #55aaff;
+}
+
+.flex_between {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.buyerProductCard {
+	width: 90%;
+	padding: 1rem;
+	margin: 1rem;
+	border: 1px solid #55aaff;
+	background-color: #ffffff;
+	border-radius: 1rem;
+}
+
+.buyerProductCardBody {
+	overflow-wrap: break-word;
+}
+
+.content {
+	padding: 5rem 1rem 5rem 1rem;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+}
+
+.category {
+	margin: 1rem;
+	padding: 1rem;
+	border: 1px solid #3388dd;
+	border-radius: 1rem;
+	text-align: center;
+	cursor: pointer;
+}
+
+.searchInput {
+	width: 80%;
+	height: 2rem;
+	padding: 0.5rem;
+	background-color: #ffffff;
+	border: 1px solid #3388dd;
+	border-radius: 1rem;
+}
+
+.searchButton {
+	padding: 0.5rem;
+	background-color: #ffffff;
+	border: 1px solid #3388dd;
+	border-radius: 1rem;
+	cursor: pointer;
+}
+
+.addBalance {
+	width: 100%;
+	padding: 0.5rem;
+	background-color: #55aaff;
+	border: 1px solid #3388dd;
+	border-radius: 1rem;
+	color: #ffffff;
+	cursor: pointer;
+}
+
+.verify {
+	width: 100%;
+	padding: 0.5rem;
+	background-color: #55aaff;
+	border: 1px solid #3388dd;
+	border-radius: 1rem;
+	color: #ffffff;
+	cursor: pointer;
+}
+
+.delete {
+	width: 100%;
+	padding: 0.5rem;
+	background-color: #dd2222;
+	border: 1px solid #bb4444;
+	border-radius: 1rem;
+	cursor: pointer;
+}
+
+.logoutButton {
+	position: absolute;
+	top: 5rem;
+	right: 1rem;
+	padding: 1rem;
+	border: 1px solid #dd2222;
+	background-color: #ee1111;
+	border-radius: 1rem;
+	color: #ffffff;
+	cursor: pointer;
+}
+
+.addProduct {
+	margin: auto;
+	width: 50%;
+	height: 50%;
+	background-color: #55aaff;
+	color: #ffffff;
+	border: 1px solid #3388dd;
+	border-radius: 1rem;
+	font-size: 2rem;
+	cursor: pointer;
 }

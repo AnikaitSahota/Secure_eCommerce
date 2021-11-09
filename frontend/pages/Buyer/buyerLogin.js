@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import * as checks from '../../components/LoginCheck';
+import api from '../api';
 
 function BuyerLogin() {
 	const router = useRouter();
@@ -15,20 +16,46 @@ function BuyerLogin() {
 
 	function securityCheck() {
 		myTrim();
+		console.log(password);
 		const lengthChecked = checks.lengthCheck(username, password);
 		if (lengthChecked[0]) {
 			const usernameChecked = checks.usernameCheck(username);
 			if (usernameChecked[0]) {
 				const passwordChecked = checks.passwordCheck(password);
 				if (passwordChecked[0]) {
-					router.push(`/Buyer/Product/product`);
+					const body = { username: username, password: password };
+					console.log(JSON.stringify(body));
+					fetch(`${api}/customer/login/`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(body),
+					})
+						.then((res) => res.json())
+						.then((res) => {
+							if (res.status == 'success') {
+								const date = new Date();
+								date.setDate(date.getDate() + 1);
+								document.cookie = `token=${res.token}; expires = ${date}`;
+								document.cookie = `type=buyer; expires = ${date}`;
+								document.cookie = `username=${username}; expires = ${date}`;
+								router.push(`/Buyer/Product/product`);
+							} else {
+								alert(res.status);
+								console.log('Login Failed');
+							}
+						});
 				} else {
+					alert(passwordChecked[1]);
 					console.log(passwordChecked[1]);
 				}
 			} else {
+				alert(usernameChecked[1]);
 				console.log(usernameChecked[1]);
 			}
 		} else {
+			alert(lengthChecked[1]);
 			console.log(lengthChecked[1]);
 		}
 	}

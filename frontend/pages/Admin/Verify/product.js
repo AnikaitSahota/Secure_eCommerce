@@ -1,5 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import AdminNavbar from '../../../components/AdminNavbar';
+import AdminProductCard from '../../../components/AdminProductCard';
 import BuyerNavbar from '../../../components/BuyerNavbar';
 import BuyerProductCard from '../../../components/BuyerProductCard';
 import UserCheck from '../../../components/userCheck';
@@ -24,11 +26,13 @@ function Product() {
 			setToken(tokenTemp);
 			setType(typeTemp);
 			setUsername(usernameTemp);
-			if (typeTemp !== 'buyer') {
+			if (typeTemp !== 'admin') {
 				router.push('/');
 			}
 		}
+	}, []);
 
+	useEffect(() => {
 		fetch(`${api}/product/all-products/`)
 			.then((res) => res.json())
 			.then((res) => {
@@ -40,18 +44,21 @@ function Product() {
 			});
 	}, []);
 
+	useEffect(() => {
+		setProducts((prev) => prev);
+	}, [products]);
+
 	return (
 		<div>
-			<BuyerNavbar />
+			<AdminNavbar />
 			<div className='content'>
 				{products.map((e, i) => {
 					return (
-						<BuyerProductCard
+						<AdminProductCard
 							key={i}
 							productName={e.name}
 							productDescription={e.description}
 							productId={e.id}
-							productImg1={e.img1}
 						/>
 					);
 				})}

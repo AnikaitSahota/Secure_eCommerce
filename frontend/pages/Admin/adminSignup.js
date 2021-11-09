@@ -1,18 +1,23 @@
-import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 import * as checks from '../../components/LoginCheck';
-import * as style from '../../styles/login.module.css';
 import api from '../api';
 
-function SellerLogin() {
+function AdminSignup() {
 	const router = useRouter();
+	const [name, setName] = useState('');
+	const [email, setEmail] = useState('');
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
+	const [phoneNumber, setPhoneNumber] = useState('');
 
 	function myTrim() {
 		setUsername(username.trim());
 		setPassword(password.trim());
+		setName(name.trim());
+		setPhoneNumber(phoneNumber.trim());
+		setEmail(email.trim());
 	}
 
 	function securityCheck() {
@@ -23,9 +28,14 @@ function SellerLogin() {
 			if (usernameChecked[0]) {
 				const passwordChecked = checks.passwordCheck(password);
 				if (passwordChecked[0]) {
-					const body = { username: username, password: password };
-					console.log(JSON.stringify(body));
-					fetch(`${api}/seller/login/`, {
+					const body = {
+						name: name,
+						username: username,
+						email_id: email,
+						password: password,
+						contact_number: phoneNumber,
+					};
+					fetch(`${api}/admin/signup/`, {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
@@ -36,13 +46,12 @@ function SellerLogin() {
 						.then((res) => {
 							if (res.status == 'success') {
 								const date = new Date();
-								date.setDate(date.getDate() + 1);
-								document.cookie = `token=${res.token}; expires = ${date}`;
-								document.cookie = `type=seller; expires = ${date}`;
-								document.cookie = `username=${username}; expires = ${date}`;
-								router.push(`/Seller/Product/product`);
+								date.setDate(date.getMinutes() + 10);
+								document.cookie = `email=${email}; expires=${date};`;
+								router.push(`/Admin/adminSignupOTP`);
 							} else {
 								alert(res.status);
+								console.log('Not able to send OTP');
 							}
 						});
 				} else {
@@ -62,8 +71,41 @@ function SellerLogin() {
 	return (
 		<div className='centerScreenContainer'>
 			<div className='cell'>
-				<div style={{ width: '100%' }} method='POST'>
-					<h2>Login (Seller)</h2>
+				<div style={{ width: '100%' }}>
+					<h2>Signup (Admin)</h2>
+					<div className='inputGroup'>
+						<label className='inputLabel'>Full Name</label>
+						<input
+							className='input'
+							type='text'
+							id='name'
+							name='name'
+							value={name}
+							onChange={(e) => setName(e.target.value)}
+						/>
+					</div>
+					<div className='inputGroup'>
+						<label className='inputLabel'>Email</label>
+						<input
+							className='input'
+							type='email'
+							id='email'
+							name='email'
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+						/>
+					</div>
+					<div className='inputGroup'>
+						<label className='inputLabel'>Phone Number</label>
+						<input
+							className='input'
+							type='number'
+							id='phoneNumber'
+							name='phoneNumber'
+							value={phoneNumber}
+							onChange={(e) => setPhoneNumber(e.target.value)}
+						/>
+					</div>
 					<div className='inputGroup'>
 						<label className='inputLabel'>Username</label>
 						<input
@@ -96,14 +138,14 @@ function SellerLogin() {
 						Submit
 					</button>
 					<div className='spaceBetween'>
-						<Link href='/Seller/sellerSignup'>
-							<a className='link'>Signup</a>
+						<Link href='/Admin/adminLogin'>
+							<a className='link'>Login</a>
+						</Link>
+						<Link href='/Seller/sellerLogin'>
+							<a className='link'>Seller?</a>
 						</Link>
 						<Link href='/Buyer/buyerLogin'>
-							<a className='link'>Customer?</a>
-						</Link>
-						<Link href='/Admin/adminLogin'>
-							<a className='link'>Admin?</a>
+							<a className='link'>Buyer?</a>
 						</Link>
 					</div>
 				</div>
@@ -112,4 +154,4 @@ function SellerLogin() {
 	);
 }
 
-export default SellerLogin;
+export default AdminSignup;
