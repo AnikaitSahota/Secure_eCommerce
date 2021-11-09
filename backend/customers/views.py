@@ -3,9 +3,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from products.models import Product
 from .models import Customer, Customer_Session, Customer_OTP, Order_Details, Wallet
-from .serializers import CustomerSerializer
+from .serializers import CustomerSerializer, OrderSerializer
+from products.serializers import ProductSerializerFew
 from rest_framework import status
-from entities import get_tokken, get_OTP
+from entities import get_tokken, get_OTP, username_verification, password_verification
+from django.db.models import Q
 from datetime import datetime, timedelta, timezone
 from django.db.models import F
 from django.conf import settings
@@ -29,37 +31,78 @@ def verify_token(customer, request):
 class UpdateWallet(APIView):
     def post(self, request):
         print(request.data)
-        customer_username = request.data["username"]
-        customer = Customer.objects.get(username=customer_username)
-        amount = Decimal(request.data['amount'])
+        if (not {'username', 'token', 'amount'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            customer = Customer.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Customer not found"}, status=status.HTTP_400_BAD_REQUEST)
         if (not verify_token(customer, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
-        customer_wallet = Wallet.objects.get(customer=customer)
+        amount = Decimal(request.data['amount'])
+        try:
+            customer_wallet = Wallet.objects.get(customer=customer)
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
         customer_wallet.amount += amount
         if (customer_wallet.amount < 0):
             customer_wallet.amount = 0
-        customer_wallet.save()
+        customer_wallet.save(update_fields=['amount'])
         return Response({"status": "success", "balance": customer_wallet.amount}, status=status.HTTP_200_OK)
+
+
+class SearchProducts(APIView):
+    def post(self, request):
+        print(request.data)
+        if(not {'username', 'token', 'search_query'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            customer = Customer.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Customer not found"}, status=status.HTTP_400_BAD_REQUEST)
+        if (not verify_token(customer, request)):
+            return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
+        search_query = request.data['search_query']
+        products = Product.objects.filter(Q(name__icontains=search_query) |
+                                          Q(category__name__icontains=search_query))
+        serializer = ProductSerializerFew(products, many=True)
+        return Response({'status': 'success', 'data': serializer.data}, status=status.HTTP_200_OK)
 
 
 class BuyProduct(APIView):
     def post(self, request):
         print(request.data)
-        customer = Customer.objects.get(username=request.data["username"])
+        if(not {'username', 'token', 'id', 'quantity'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            customer = Customer.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Customer not found"}, status=status.HTTP_400_BAD_REQUEST)
         if (not verify_token(customer, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
-        product = Product.objects.get(id=request.data['id'])
+        try:
+            product = Product.objects.get(id=request.data['id'])
+        except:
+            return Response({"status": "Product not found"}, status=status.HTTP_400_BAD_REQUEST)
         quantity = int(request.data['quantity'])
         total_amount = (product.price * quantity)
-        wallet = Wallet.objects.get(customer=customer)
+        try:
+            wallet = Wallet.objects.get(customer=customer)
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
         wallet_amount = wallet.amount
         if (wallet_amount >= total_amount):
             current_quantity = product.inventory
             if (current_quantity >= quantity):
                 product.inventory = current_quantity - quantity
-                product.save()
+                product.save(update_fields=['inventory'])
                 wallet.amount = wallet_amount - total_amount
-                wallet.save()
+                wallet.save(update_fields=['amount'])
                 new_order = Order_Details(product_name=product.name,
                                           customer=customer,
                                           quantity=quantity,
@@ -74,30 +117,60 @@ class BuyProduct(APIView):
             return Response({"status": "Insufficient Balance, Add balance to your wallet"}, status=status.HTTP_200_OK)
 
 
+class OrderHistory(APIView):
+    def post(self, request):
+        print(request.data)
+        if(not {'username', 'token'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            customer = Customer.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Customer not found"}, status=status.HTTP_400_BAD_REQUEST)
+        if (not verify_token(customer, request)):
+            return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
+        past_orders = Order_Details.objects.filter(customer=customer)
+        serializer = OrderSerializer(past_orders, many=True)
+        return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+
+
 class GetCustomerDetails(APIView):
     def post(self, request):
         print(request.data)
-        customer = Customer.objects.get(username=request.data["username"])
+        if(not {'username', 'token'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            customer = Customer.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Customer not found"}, status=status.HTTP_400_BAD_REQUEST)
         if (not verify_token(customer, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
         serializer = CustomerSerializer(customer)
-        wallet = Wallet.objects.get(customer=customer)
+        try:
+            wallet = Wallet.objects.get(customer=customer)
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"status": "success", "data": serializer.data, "balance": wallet.amount}, status=status.HTTP_200_OK)
 
 
 class UpdateCustomerDetails(APIView):
     def put(self, request):
         print(request.data)
-        seller = Customer.objects.get(username=request.data["username"])
-        if (not verify_token(seller, request)):
+        if(not {'username', 'token', 'name', 'contact_number', 'address'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            customer = Customer.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Customer not found"}, status=status.HTTP_400_BAD_REQUEST)
+        if (not verify_token(customer, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
-        if ('name' in request.data):
-            seller.name = request.data['name']
-        if ('contact_number' in request.data):
-            seller.contact_number = request.data['contact_number']
-        if ('address' in request.data):
-            seller.address = request.data['address']
-        seller.save()
+        customer.name = request.data['name']
+        customer.contact_number = request.data['contact_number']
+        customer.address = request.data['address']
+        customer.save(update_fields=['name', 'contact_number', 'address'])
         return Response({"status": "success"}, status=status.HTTP_200_OK)
 
 
@@ -107,7 +180,15 @@ class CustomerSignUpView(APIView):
         if(not {'username', 'email_id', 'name', 'address',
                 'password', 'contact_number'}.issubset(request.data.keys())):
             return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
-
+        if (not (username_verification(request.data['username']))):
+            return Response({"status": "Username doesn't meet the requirements"}, status=status.HTTP_400_BAD_REQUEST)
+        if (not (password_verification(request.data['password']))):
+            return Response({"status": "Password doesn't meet the requirements"}, status=status.HTTP_400_BAD_REQUEST)
+        if (Customer.objects.filter(Q(name=request.data['username']) |
+                                    Q(email_id=request.data['email_id']) |
+                                    Q(contact_number=request.data['contact_number'])).exists()):
+            return Response({"status": "Admin with this username, email_id or contact_number already exists!"},
+                            status=status.HTTP_400_BAD_REQUEST)
         try:
             OTP = get_OTP()
             message = 'Hi ' + request.data['username'] + '\n' + \
@@ -144,7 +225,9 @@ class CustomerOTPverification(APIView):
         status_msg = 'success'
         if(not {'email_id', 'OTP'}.issubset(request.data.keys())):
             return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
-
+        expired_OTP_tuples = Customer_OTP.objects.filter(time_of_creation__lt=(
+            datetime.now(timezone.utc) - timedelta(minutes=settings.OTP_TIME_WINDOW)))
+        expired_OTP_tuples.delete()
         try:
             OTP_tuple = Customer_OTP.objects.filter(
                 email_id=request.data['email_id']).order_by('-time_of_creation')[0]
@@ -172,9 +255,6 @@ class CustomerOTPverification(APIView):
                 raise Exception  # wrong OTP
         except Exception as exp:
             print(exp)
-            expired_OTP_tuples = Customer_OTP.objects.filter(time_of_creation__lt=(
-                datetime.now(timezone.utc) - timedelta(minutes=settings.OTP_TIME_WINDOW)))
-            expired_OTP_tuples.delete()
             return Response({"status": status_msg}, status=status.HTTP_200_OK)
 
 
@@ -189,7 +269,13 @@ class CustomerAuthenticationView(APIView):
                                     password=sha256(bytes(request.data['password'], 'utf-8')).hexdigest())).exists():
 
             current_token = get_tokken()
-            customer = Customer.objects.get(username=request.data['username'])
+            try:
+                customer = Customer.objects.get(
+                    username=request.data['username'])
+            except Exception as exp:
+                print(exp)
+                return Response({"status": "error"},
+                                status=status.HTTP_400_BAD_REQUEST)
             new_tuple = Customer_Session(
                 customer=customer, token=current_token)
             new_tuple.save()
@@ -203,9 +289,18 @@ class CustomerAuthenticationView(APIView):
 class CustomerLogoutView(APIView):
     def post(self, request):
         print(request.data)
-        customer = Customer.objects.get(username=request.data["username"])
+        if(not {'username', 'token'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            customer = Customer.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Customer not found"}, status=status.HTTP_400_BAD_REQUEST)
         if (not verify_token(customer, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
         customer_sessions = Customer_Session.objects.filter(customer=customer)
         customer_sessions.delete()
+        expired_sessions = Customer_Session.objects.filter(time_of_creation__lt=(
+            datetime.now(timezone.utc) - timedelta(minutes=settings.SESSION_TIME_WINDOW)))
+        expired_sessions.delete()
         return Response({"status": "success"}, status=status.HTTP_200_OK)

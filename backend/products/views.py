@@ -25,26 +25,32 @@ class AllCategoriesView(APIView):
 
 class SpecificCategoryView(APIView):
     def post(self, request):
-        category_name = request.data["category_name"]
-        category = Category.objects.get(name=category_name)
-        products = Product.objects.filter(category_id=category.id)
+        if(not {'category_name'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            category = Category.objects.get(
+                name=request.data["category_name"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Category not found"}, status=status.HTTP_400_BAD_REQUEST)
+        products = Product.objects.filter(category=category)
         serializer = ProductSerializerFew(products, many=True)
         return Response({'status': 'success', 'data': serializer.data}, status=status.HTTP_200_OK)
 
 
 class SpecificProductView(APIView):
     def post(self, request):
-        # product_id = request.GET['id']
-        # if(product_id.isnumeric() == False):
-        #     return Response({"status": "error"},
-        #                     status=status.HTTP_400_BAD_REQUEST)
-        # product_id = int(product_id)
-
-        # product = Product.objects.get(id=product_id)
-        # serializer = ProductSerializer(product)
-        # return Response({'status': 'success', 'data': serializer.data}, status=status.HTTP_200_OK)
         print(request.data)
-        product = Product.objects.get(id=request.data['id'])
+        if(not {'id'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        product_id = request.data['id']
+        if(product_id.isnumeric() == False):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        product_id = int(product_id)
+        try:
+            product = Product.objects.get(id=product_id)
+        except:
+            return Response({"status": "Product not found"}, status=status.HTTP_400_BAD_REQUEST)
         product_dict = {'id': product.id,
                         'name': product.name,
                         'img1': product.img1,
@@ -56,5 +62,4 @@ class SpecificProductView(APIView):
                         'price': str(product.price),
                         }
         serializer = json.dumps(product_dict)
-        print(serializer)
         return Response({"status": "success", "data": serializer}, status=status.HTTP_200_OK)
