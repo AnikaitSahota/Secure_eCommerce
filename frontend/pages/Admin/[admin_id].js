@@ -12,7 +12,6 @@ function AdminAccount() {
 	const [editable, setEditable] = useState(true);
 	const [user, setUser] = useState({});
 	const [token, setToken] = useState('');
-	const [type, setType] = useState('');
 	const [usernameCurr, setUsernameCurr] = useState('');
 
 	useEffect(() => {
@@ -20,12 +19,11 @@ function AdminAccount() {
 		if (!cookie) {
 			router.push(`/`);
 		} else {
-			var cookies = cookie.split(';');
-			var tokenTemp = cookies[0].split('=')[1];
-			var typeTemp = cookies[1].split('=')[1];
-			var usernameTemp = cookies[2].split('=')[1];
+			var cookies = JSON.parse(cookie.split('=')[1]);
+			var tokenTemp = cookies.token;
+			var typeTemp = cookies.type;
+			var usernameTemp = cookies.username;
 			setToken(tokenTemp);
-			setType(typeTemp);
 			setUsernameCurr(usernameTemp);
 			if (typeTemp !== 'admin') {
 				router.push('/');
@@ -106,15 +104,10 @@ function AdminAccount() {
 			.then((res) => {
 				if (res.status == 'success') {
 					document.cookie =
-						'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-					document.cookie =
-						'type=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-					document.cookie =
-						'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-					router.push(`/`);
+						'info=; expires = Thu, 01 Jan 1970 00:00:00 UTC;';
+					router.push(`/Admin/adminLogin`);
 				} else {
 					alert(res.status);
-					coneole.log('Unable to Logout');
 				}
 			});
 	}

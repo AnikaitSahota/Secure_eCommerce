@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import router from 'next/router';
 import { useEffect, useState } from 'react';
 import BuyerNavbar from '../../components/BuyerNavbar';
@@ -15,7 +16,6 @@ function BuyerAccount() {
 	const [newBalance, setNewBalance] = useState(0);
 	const [addShow, setAddShow] = useState(false);
 	const [token, setToken] = useState('');
-	const [type, setType] = useState('');
 	const [usernameCurr, setUsernameCurr] = useState('');
 
 	useEffect(() => {
@@ -23,12 +23,11 @@ function BuyerAccount() {
 		if (!cookie) {
 			router.push(`/`);
 		} else {
-			var cookies = cookie.split(';');
-			var tokenTemp = cookies[0].split('=')[1];
-			var typeTemp = cookies[1].split('=')[1];
-			var usernameTemp = cookies[2].split('=')[1];
+			var cookies = JSON.parse(cookie.split('=')[1]);
+			var tokenTemp = cookies.token;
+			var typeTemp = cookies.type;
+			var usernameTemp = cookies.username;
 			setToken(tokenTemp);
-			setType(typeTemp);
 			setUsernameCurr(usernameTemp);
 			if (typeTemp !== 'buyer') {
 				router.push('/');
@@ -139,11 +138,7 @@ function BuyerAccount() {
 			.then((res) => {
 				if (res.status == 'success') {
 					document.cookie =
-						'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-					document.cookie =
-						'type=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-					document.cookie =
-						'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+						'info=; expires = Thu, 01 Jan 1970 00:00:00 UTC;';
 					router.push(`/`);
 				} else {
 					alert(res.status);
@@ -305,6 +300,15 @@ function BuyerAccount() {
 				</div>
 				<div className='logoutButton' onClick={(e) => logout()}>
 					Logout
+				</div>
+				<div className='cell'>
+					<Link href='/Buyer/orders'>
+						<a>
+							<h2 style={{ textAlign: 'center' }}>
+								Previous Orders
+							</h2>
+						</a>
+					</Link>
 				</div>
 			</div>
 		</div>

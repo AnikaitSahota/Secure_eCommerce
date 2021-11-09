@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as checks from '../../components/LoginCheck';
 import api from '../api';
 
@@ -12,6 +12,23 @@ function BuyerSignup() {
 	const [password, setPassword] = useState('');
 	const [phoneNumber, setPhoneNumber] = useState('');
 	const [address, setAddress] = useState('');
+
+	useEffect(() => {
+		const cookie = document.cookie;
+		if (cookie) {
+			var cookies = JSON.parse(cookie.split('=')[1]);
+			var tokenTemp = cookies.token;
+			var typeTemp = cookies.type;
+			var usernameTemp = cookies.username;
+			if (typeTemp == 'seller') {
+				router.push('/Seller/Product/product');
+			} else if (typeTemp == 'admin') {
+				router.push('/Admin/Verify/product');
+			} else if (typeTemp == 'buyer') {
+				router.push('/Buyer/Product/product');
+			}
+		}
+	}, []);
 
 	function myTrim() {
 		setUsername(username.trim());

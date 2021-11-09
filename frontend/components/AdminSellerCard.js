@@ -6,7 +6,6 @@ function AdminSellerCard({ name, verified, username, phone, email }) {
 	const router = useRouter();
 
 	const [token, setToken] = useState('');
-	const [type, setType] = useState('');
 	const [usernameCurr, setUsernameCurr] = useState('');
 
 	useEffect(() => {
@@ -14,16 +13,23 @@ function AdminSellerCard({ name, verified, username, phone, email }) {
 		if (!cookie) {
 			router.push(`/`);
 		} else {
-			var cookies = cookie.split(';');
-			var tokenTemp = cookies[0].split('=')[1];
-			var typeTemp = cookies[1].split('=')[1];
-			var usernameTemp = cookies[2].split('=')[1];
+			var cookies = JSON.parse(cookie.split('=')[1]);
+			var tokenTemp = cookies.token;
+			var typeTemp = cookies.type;
+			var usernameTemp = cookies.username;
 			setToken(tokenTemp);
-			setType(typeTemp);
 			setUsernameCurr(usernameTemp);
 			if (typeTemp !== 'admin') {
 				router.push('/');
 			}
+		}
+
+		if (verified) {
+			const box = document.getElementById(name);
+			box.style.backgroundColor = '#22dd22';
+
+			const buttons = box.getElementsByTagName('button');
+			buttons[0].style.display = 'none';
 		}
 	}, []);
 
@@ -47,9 +53,7 @@ function AdminSellerCard({ name, verified, username, phone, email }) {
 					box.style.backgroundColor = '#22dd22';
 
 					const buttons = box.getElementsByTagName('button');
-					for (let i = 0; i < buttons.length; i++) {
-						buttons[i].style.display = 'none';
-					}
+					buttons[0].style.display = 'none';
 				} else {
 					alert('Unable to verify');
 				}
@@ -84,16 +88,6 @@ function AdminSellerCard({ name, verified, username, phone, email }) {
 				}
 			});
 	}
-
-	useEffect(() => {
-		if (verified) {
-			const box = document.getElementById(name);
-			box.style.backgroundColor = '#22dd22';
-
-			const buttons = box.getElementsByTagName('button');
-			buttons[0].style.display = 'none';
-		}
-	}, []);
 
 	return (
 		<div className='buyerProductCard' id={name}>

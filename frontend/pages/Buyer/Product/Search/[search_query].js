@@ -4,15 +4,18 @@ import BuyerNavbar from '../../../../components/BuyerNavbar';
 import BuyerProductCard from '../../../../components/BuyerProductCard';
 import api from '../../../api';
 
-function BuyerCategoryAccount() {
+function SearchProduct() {
 	const router = useRouter();
-	const { category_name } = router.query;
-	const [isFirstRender, setFirstRender] = useState(true);
+	const { search_query } = router.query;
 	const [products, setProducts] = useState([]);
+	const [isFirstRender, setFirstRender] = useState(true);
+	const [token, setToken] = useState('');
+	const [username, setUsername] = useState('');
 
 	useEffect(() => {
-		if (isFirstRender && category_name) {
+		if (isFirstRender && search_query) {
 			setFirstRender(false);
+
 			const cookie = document.cookie;
 			if (!cookie) {
 				router.push(`/`);
@@ -21,31 +24,32 @@ function BuyerCategoryAccount() {
 				var tokenTemp = cookies.token;
 				var typeTemp = cookies.type;
 				var usernameTemp = cookies.username;
+				setToken(tokenTemp);
+				setUsername(usernameTemp);
 				if (typeTemp !== 'buyer') {
 					router.push('/');
 				}
+				const body = {
+					token: tokenTemp,
+					username: usernameTemp,
+					search_query: search_query,
+				};
+				fetch(`${api}/customer/search-products/`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(body),
+				})
+					.then((res) => res.json())
+					.then((res) => {
+						if (res.status == 'success') {
+							setProducts(res.data);
+						} else {
+							alert(res.status);
+						}
+					});
 			}
-
-			const body = {
-				token: tokenTemp,
-				username: usernameTemp,
-				category_name: category_name,
-			};
-			fetch(`${api}/product/specific-category/`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(body),
-			})
-				.then((res) => res.json())
-				.then((res) => {
-					if (res.status == 'success') {
-						setProducts(res.data);
-					} else {
-						alert(res.status);
-					}
-				});
 		}
 	});
 
@@ -53,9 +57,6 @@ function BuyerCategoryAccount() {
 		<div>
 			<BuyerNavbar />
 			<div className='content'>
-				<h1 style={{ textAlign: 'center', padding: '3rem' }}>
-					{category_name}
-				</h1>
 				{products.map((e, i) => {
 					return (
 						<BuyerProductCard
@@ -72,4 +73,4 @@ function BuyerCategoryAccount() {
 	);
 }
 
-export default BuyerCategoryAccount;
+export default SearchProduct;

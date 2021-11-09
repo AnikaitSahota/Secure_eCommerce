@@ -8,7 +8,6 @@ function AddCategory() {
 	const [name, setName] = useState('');
 	const [description, setDescription] = useState('');
 	const [token, setToken] = useState('');
-	const [type, setType] = useState('');
 	const [username, setUsername] = useState('');
 
 	useEffect(() => {
@@ -16,12 +15,11 @@ function AddCategory() {
 		if (!cookie) {
 			router.push(`/`);
 		} else {
-			var cookies = cookie.split(';');
-			var tokenTemp = cookies[0].split('=')[1];
-			var typeTemp = cookies[1].split('=')[1];
-			var usernameTemp = cookies[2].split('=')[1];
+			var cookies = JSON.parse(cookie.split('=')[1]);
+			var tokenTemp = cookies.token;
+			var typeTemp = cookies.type;
+			var usernameTemp = cookies.username;
 			setToken(tokenTemp);
-			setType(typeTemp);
 			setUsername(usernameTemp);
 			if (typeTemp !== 'admin') {
 				router.push('/');

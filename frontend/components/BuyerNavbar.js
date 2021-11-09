@@ -5,8 +5,6 @@ import { useEffect, useState } from 'react';
 function BuyerNavbar() {
 	const [search, setSearch] = useState('');
 	const router = useRouter();
-	const [token, setToken] = useState('');
-	const [type, setType] = useState('');
 	const [username, setUsername] = useState('');
 
 	useEffect(() => {
@@ -14,18 +12,17 @@ function BuyerNavbar() {
 		if (!cookie) {
 			router.push(`/`);
 		} else {
-			var cookies = cookie.split(';');
-			var tokenTemp = cookies[0].split('=')[1];
-			var typeTemp = cookies[1].split('=')[1];
-			var usernameTemp = cookies[2].split('=')[1];
-			setToken(tokenTemp);
-			setType(typeTemp);
+			var cookies = JSON.parse(cookie.split('=')[1]);
+			var tokenTemp = cookies.token;
+			var typeTemp = cookies.type;
+			var usernameTemp = cookies.username;
 			setUsername(usernameTemp);
-			if (typeTemp !== 'buyer') {
-				router.push('/');
-			}
 		}
 	}, []);
+
+	function onSearch() {
+		router.push(`/Buyer/Product/Search/${search}`);
+	}
 
 	return (
 		<div className='navbar'>
@@ -46,7 +43,9 @@ function BuyerNavbar() {
 					value={search}
 					onChange={(e) => setSearch(e.target.value)}
 				/>
-				<button className='searchButton'>Search</button>
+				<button className='searchButton' onClick={(e) => onSearch()}>
+					Search
+				</button>
 			</div>
 			<Link href={`/Buyer/${username}`}>
 				<a>Account</a>

@@ -1,13 +1,30 @@
 import Link from 'next/link';
-import router from 'next/router';
-import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import * as checks from '../../components/LoginCheck';
-import * as style from '../../styles/login.module.css';
 import api from '../api';
 
 function AdminLogin() {
+	const router = useRouter();
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
+
+	useEffect(() => {
+		const cookie = document.cookie;
+		if (cookie) {
+			var cookies = JSON.parse(cookie.split('=')[1]);
+			var tokenTemp = cookies.token;
+			var typeTemp = cookies.type;
+			var usernameTemp = cookies.username;
+			if (typeTemp == 'seller') {
+				router.push('/Seller/Product/product');
+			} else if (typeTemp == 'admin') {
+				router.push('/Admin/Verify/product');
+			} else if (typeTemp == 'buyer') {
+				router.push('/Buyer/Product/product');
+			}
+		}
+	}, []);
 
 	function myTrim() {
 		setUsername(username.trim());
@@ -35,10 +52,8 @@ function AdminLogin() {
 							if (res.status == 'success') {
 								const date = new Date();
 								date.setDate(date.getDate() + 1);
-								document.cookie = `token=${res.token}; expires = ${date}`;
-								document.cookie = `type=admin; expires = ${date}`;
-								document.cookie = `username=${username}; expires = ${date}`;
-								router.push(`/Admin/Verify/seller`);
+								document.cookie = `info={ "token" : "${res.token}", "type" : "admin", "username" : "${username}"}; expires = ${date}`;
+								router.push(`/Admin/Verify/product`);
 							} else {
 								alert(res.status);
 							}
@@ -55,8 +70,8 @@ function AdminLogin() {
 	}
 
 	return (
-		<div className={style.centerScreenContainer}>
-			<div className={style.cell}>
+		<div className='centerScreenContainer'>
+			<div className='cell'>
 				<div style={{ width: '100%' }}>
 					<h2>Login (Admin)</h2>
 					<div className='inputGroup'>

@@ -16,7 +16,6 @@ function BuyerProductSingle() {
 	const [buyAmount, setBuyAmount] = useState(0);
 	const [buyPrice, setBuyPrice] = useState(0);
 	const [token, setToken] = useState('');
-	const [type, setType] = useState('');
 	const [username, setUsername] = useState('');
 	const [isFirstRender, setFirstRender] = useState(true);
 	const [editbale, setEditable] = useState(true);
@@ -24,25 +23,20 @@ function BuyerProductSingle() {
 	useEffect(() => {
 		if (isFirstRender && product_id) {
 			setFirstRender(false);
+
 			const cookie = document.cookie;
 			if (!cookie) {
 				router.push(`/`);
 			} else {
-				var cookies = cookie.split(';');
-				var tokenTemp = cookies[0].split('=')[1];
-				var typeTemp = cookies[1].split('=')[1];
-				var usernameTemp = cookies[2].split('=')[1];
+				var cookies = JSON.parse(cookie.split('=')[1]);
+				var tokenTemp = cookies.token;
+				var typeTemp = cookies.type;
+				var usernameTemp = cookies.username;
 				setToken(tokenTemp);
-				setType(typeTemp);
 				setUsername(usernameTemp);
-				if (typeTemp !== 'buyer') {
-					router.push('/');
-				}
 			}
 
 			const body = {
-				token: tokenTemp,
-				username: usernameTemp,
 				id: product_id,
 			};
 			fetch(`${api}/product/specific-product/`, {
@@ -77,8 +71,7 @@ function BuyerProductSingle() {
 	function placeOrder() {
 		const body = {
 			token: token,
-			username,
-			username,
+			username: username,
 			id: product_id,
 			quantity: buyAmount,
 		};
@@ -139,6 +132,17 @@ function BuyerProductSingle() {
 						<p>{description}</p>
 						<p>{quantity} pieces left</p>
 						<h3>${price}</h3>
+						<button
+							className='addBalance'
+							style={{ marginBottom: '1rem' }}
+							onClick={(e) => {
+								alert(
+									`Your link is: http://localhost:3000${router.asPath}`
+								);
+							}}
+						>
+							Get Share Link
+						</button>
 						<button
 							className='addBalance'
 							onClick={(e) => buyProduct()}

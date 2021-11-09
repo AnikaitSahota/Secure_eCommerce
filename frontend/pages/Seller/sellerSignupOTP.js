@@ -1,6 +1,5 @@
-import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../api';
 
 function SellerSignupOTP() {
@@ -28,6 +27,12 @@ function SellerSignupOTP() {
 				}
 			});
 	}
+
+	useEffect(() => {
+		return () => {
+			document.cookie = 'email=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+		};
+	}, []);
 
 	return (
 		<div className='centerScreenContainer'>

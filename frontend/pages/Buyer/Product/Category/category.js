@@ -5,22 +5,16 @@ import api from '../../../api';
 
 function ProductCategories() {
 	const [categories, setCategories] = useState([]);
-	const [token, setToken] = useState('');
-	const [type, setType] = useState('');
-	const [username, setUsername] = useState('');
 
 	useEffect(() => {
 		const cookie = document.cookie;
 		if (!cookie) {
 			router.push(`/`);
 		} else {
-			var cookies = cookie.split(';');
-			var tokenTemp = cookies[0].split('=')[1];
-			var typeTemp = cookies[1].split('=')[1];
-			var usernameTemp = cookies[2].split('=')[1];
-			setToken(tokenTemp);
-			setType(typeTemp);
-			setUsername(usernameTemp);
+			var cookies = JSON.parse(cookie.split('=')[1]);
+			var tokenTemp = cookies.token;
+			var typeTemp = cookies.type;
+			var usernameTemp = cookies.username;
 			if (typeTemp !== 'buyer') {
 				router.push('/');
 			}

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as checks from '../../components/LoginCheck';
 import api from '../api';
 
@@ -8,6 +8,23 @@ function BuyerLogin() {
 	const router = useRouter();
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
+
+	useEffect(() => {
+		const cookie = document.cookie;
+		if (cookie) {
+			var cookies = JSON.parse(cookie.split('=')[1]);
+			var tokenTemp = cookies.token;
+			var typeTemp = cookies.type;
+			var usernameTemp = cookies.username;
+			if (typeTemp == 'seller') {
+				router.push('/Seller/Product/product');
+			} else if (typeTemp == 'admin') {
+				router.push('/Admin/Verify/product');
+			} else if (typeTemp == 'buyer') {
+				router.push('/Buyer/Product/product');
+			}
+		}
+	}, []);
 
 	function myTrim() {
 		setUsername(username.trim());
@@ -35,9 +52,7 @@ function BuyerLogin() {
 							if (res.status == 'success') {
 								const date = new Date();
 								date.setDate(date.getDate() + 1);
-								document.cookie = `token=${res.token}; expires = ${date}`;
-								document.cookie = `type=buyer; expires = ${date}`;
-								document.cookie = `username=${username}; expires = ${date}`;
+								document.cookie = `info={ "token" : "${res.token}", "type" : "buyer", "username" : "${username}"}; expires = ${date}`;
 								router.push(`/Buyer/Product/product`);
 							} else {
 								alert(res.status);
