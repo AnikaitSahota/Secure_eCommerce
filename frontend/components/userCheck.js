@@ -2,7 +2,6 @@ function UserCheck() {
 	const cookie = document.cookie;
 
 	if (!cookie) {
-		console.log('No Cookie Present');
 		return [false, null];
 	} else {
 		var info = document.cookie.split('=')[1];

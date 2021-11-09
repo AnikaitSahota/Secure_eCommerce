@@ -51,12 +51,10 @@ function AddCategory() {
 		})
 			.then((res) => res.json())
 			.then((res) => {
-				console.log(res);
 				if (res.status == 'success') {
 					router.push(`/Admin/Verify/category`);
 				} else {
 					alert(res.status);
-					console.log('Unable to add Category');
 				}
 			});
 	}

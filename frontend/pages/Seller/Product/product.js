@@ -41,7 +41,6 @@ function Product() {
 				if (res.status == 'success') {
 					setProducts(res.data);
 				} else {
-					console.log(res.status);
 					alert(res.status);
 				}
 			});

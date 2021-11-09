@@ -72,7 +72,6 @@ function AdminAccount() {
 			token: token,
 			username: username,
 		};
-		console.log(JSON.stringify(body));
 		fetch(`${api}/admin/update-admin-details/`, {
 			method: 'PUT',
 			headers: {
@@ -82,12 +81,10 @@ function AdminAccount() {
 		})
 			.then((res) => res.json())
 			.then((res) => {
-				console.log(res);
 				if (res.status == 'success') {
 					setEditable((prev) => !prev);
 				} else {
 					alert(res.status);
-					console.log('Unable to Update');
 				}
 			});
 	}

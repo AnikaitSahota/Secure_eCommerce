@@ -7,7 +7,6 @@ function SellerProductCard(props) {
 	const productId = props.productId;
 
 	function clicked() {
-		console.log(productId);
 		router.push(`/Seller/Product/${productId}`);
 	}
 

@@ -10,7 +10,6 @@ function SellerSignupOTP() {
 	function securityCheck() {
 		const email = document.cookie.split('=')[1];
 		const body = { email_id: email, OTP: otp };
-		console.log(body);
 		fetch(`${api}/seller/OTPverification/`, {
 			method: 'POST',
 			headers: {
@@ -20,11 +19,9 @@ function SellerSignupOTP() {
 		})
 			.then((res) => res.json())
 			.then((res) => {
-				console.log(res);
 				if (res.status == 'success') {
 					document.cookie =
 						'email=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-					console.log(document.cookie);
 					router.push(`/Seller/sellerLogin`);
 				} else {
 					alert(res.status);

@@ -10,7 +10,6 @@ function AdminSignupOTP() {
 	function securityCheck() {
 		const email = document.cookie.split('=')[1];
 		const body = { email_id: email, OTP: otp };
-		console.log(body);
 		fetch(`${api}/admin/OTPverification/`, {
 			method: 'POST',
 			headers: {
@@ -20,15 +19,12 @@ function AdminSignupOTP() {
 		})
 			.then((res) => res.json())
 			.then((res) => {
-				console.log(res);
 				if (res.status == 'success') {
 					document.cookie =
 						'email=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-					console.log(document.cookie);
 					router.push(`/Admin/adminLogin`);
 				} else {
 					alert(res.status);
-					console.log('Wrong OTP');
 				}
 			});
 	}

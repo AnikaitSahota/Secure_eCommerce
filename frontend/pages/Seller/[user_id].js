@@ -69,7 +69,6 @@ function SellerAccount() {
 			token: token,
 			username: username,
 		};
-		console.log(JSON.stringify(body));
 		fetch(`${api}/seller/update-seller-details/`, {
 			method: 'PUT',
 			headers: {
@@ -79,7 +78,6 @@ function SellerAccount() {
 		})
 			.then((res) => res.json())
 			.then((res) => {
-				console.log(res);
 				if (res.status == 'success') {
 					alert('Information Successfully Updated');
 					setEditable((prev) => !prev);

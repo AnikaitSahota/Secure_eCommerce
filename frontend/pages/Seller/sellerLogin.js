@@ -24,7 +24,6 @@ function SellerLogin() {
 				const passwordChecked = checks.passwordCheck(password);
 				if (passwordChecked[0]) {
 					const body = { username: username, password: password };
-					console.log(JSON.stringify(body));
 					fetch(`${api}/seller/login/`, {
 						method: 'POST',
 						headers: {
@@ -47,15 +46,12 @@ function SellerLogin() {
 						});
 				} else {
 					alert(passwordChecked[1]);
-					console.log(passwordChecked[1]);
 				}
 			} else {
 				alert(usernameChecked[1]);
-				console.log(usernameChecked[1]);
 			}
 		} else {
 			alert(lengthChecked[1]);
-			console.log(lengthChecked[1]);
 		}
 	}
 

@@ -68,7 +68,6 @@ function BuyerAccount() {
 
 	function securityCheck() {
 		myTrim();
-		console.log('updated info');
 		const body = {
 			token: token,
 			username: usernameCurr,

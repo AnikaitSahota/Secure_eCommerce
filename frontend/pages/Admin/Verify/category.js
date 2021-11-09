@@ -54,7 +54,6 @@ function Category() {
 			<AdminNavbar />
 			<div className='content'>
 				{categories.map((e, i) => {
-					console.log(e);
 					return <AdminCategoryCard key={i} productName={e.name} />;
 				})}
 			</div>
