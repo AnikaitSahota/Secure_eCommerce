@@ -175,13 +175,13 @@ class SellerSignUpView(APIView):
             message = 'Hi ' + request.data['username'] + '\n' + \
                 'Thanks for joining! Please verify your email address\n' + \
                 'Use ' + str(OTP) + ' as OTP'
-            print(message)
-            # try:
-            #     send_mail('Welcome to pappu ki dukan', 'Hi123412 This is your OTP, kindy do shit things with it',
-            #               settings.DEFAULT_FROM_EMAIL, [request.data['email_id']])
-            # except Exception as exp:
-            #     print(exp)
-            #     return Response({"status": "Invalid Email"}, status=status.HTTP_200_OK)
+            # print(message)
+            try:
+                send_mail('Welcome to pappu ki dukan', message,
+                          settings.DEFAULT_FROM_EMAIL, [request.data['email_id']])
+            except Exception as exp:
+                print(exp)
+                return Response({"status": "Invalid Email"}, status=status.HTTP_200_OK)
 
             request.data['password'] = sha256(
                 bytes(request.data['password'], 'utf-8')).hexdigest()
