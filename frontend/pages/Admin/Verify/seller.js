@@ -1,12 +1,12 @@
-import SellerNavbar from '../../../components/SellerNavbar';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import SellerProductCard from '../../../components/SellerProductCard';
+import AdminNavbar from '../../../components/AdminNavbar';
+import AdminSellerCard from '../../../components/AdminSellerCard';
 import api from '../../api';
 
-function Product() {
+function AdminVerifySeller() {
 	const router = useRouter();
-	const [products, setProducts] = useState([]);
+	const [sellers, setSellers] = useState([]);
 
 	useEffect(() => {
 		const cookie = document.cookie;
@@ -17,13 +17,13 @@ function Product() {
 			var tokenTemp = cookies.token;
 			var typeTemp = cookies.type;
 			var usernameTemp = cookies.username;
-			if (typeTemp !== 'seller') {
+			if (typeTemp !== 'admin') {
 				router.push('/');
 			}
 		}
 
 		const body = { token: tokenTemp, username: usernameTemp };
-		fetch(`${api}/seller/get-products/`, {
+		fetch(`${api}/admin/get-sellers/`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -33,35 +33,32 @@ function Product() {
 			.then((res) => res.json())
 			.then((res) => {
 				if (res.status == 'success') {
-					setProducts(res.data);
+					setSellers(res.data);
 				} else {
 					alert(res.status);
 				}
 			});
 	}, []);
 
-	useEffect(() => {
-		setProducts((prev) => prev);
-	}, [products]);
+	useEffect(() => {}, []);
 
-	function addProduct() {
-		router.push(`/Seller/Product/addProduct`);
-	}
+	useEffect(() => {
+		setSellers((prev) => prev);
+	}, [sellers]);
 
 	return (
 		<div>
-			<SellerNavbar />
+			<AdminNavbar />
 			<div className='content'>
-				<button className='addProduct' onClick={(e) => addProduct()}>
-					Add Product
-				</button>
-				{products.map((e, i) => {
+				{sellers.map((e, i) => {
 					return (
-						<SellerProductCard
+						<AdminSellerCard
 							key={i}
-							productName={e.name}
-							productDescription={e.description}
-							productId={e.id}
+							name={e.name}
+							username={e.username}
+							email={e.email_id}
+							phone={e.contact_number}
+							verified={e.verified}
 						/>
 					);
 				})}
@@ -70,4 +67,4 @@ function Product() {
 	);
 }
 
-export default Product;
+export default AdminVerifySeller;

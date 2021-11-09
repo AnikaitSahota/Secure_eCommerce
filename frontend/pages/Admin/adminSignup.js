@@ -4,10 +4,13 @@ import { useEffect, useState } from 'react';
 import * as checks from '../../components/LoginCheck';
 import api from '../api';
 
-function AdminLogin() {
+function AdminSignup() {
 	const router = useRouter();
+	const [name, setName] = useState('');
+	const [email, setEmail] = useState('');
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
+	const [phoneNumber, setPhoneNumber] = useState('');
 
 	useEffect(() => {
 		const cookie = document.cookie;
@@ -29,6 +32,9 @@ function AdminLogin() {
 	function myTrim() {
 		setUsername(username.trim());
 		setPassword(password.trim());
+		setName(name.trim());
+		setPhoneNumber(phoneNumber.trim());
+		setEmail(email.trim());
 	}
 
 	function securityCheck() {
@@ -39,8 +45,14 @@ function AdminLogin() {
 			if (usernameChecked[0]) {
 				const passwordChecked = checks.passwordCheck(password);
 				if (passwordChecked[0]) {
-					const body = { username: username, password: password };
-					fetch(`${api}/admin/login/`, {
+					const body = {
+						name: name,
+						username: username,
+						email_id: email,
+						password: password,
+						contact_number: phoneNumber,
+					};
+					fetch(`${api}/admin/signup/`, {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
@@ -51,9 +63,9 @@ function AdminLogin() {
 						.then((res) => {
 							if (res.status == 'success') {
 								const date = new Date();
-								date.setDate(date.getDate() + 1);
-								document.cookie = `info={ "token" : "${res.token}", "type" : "admin", "username" : "${username}"}; expires = ${date}`;
-								router.push(`/Admin/Verify/product`);
+								date.setDate(date.getMinutes() + 10);
+								document.cookie = `email=${email}; expires=${date};`;
+								router.push(`/Admin/adminSignupOTP`);
 							} else {
 								alert(res.status);
 							}
@@ -73,7 +85,40 @@ function AdminLogin() {
 		<div className='centerScreenContainer'>
 			<div className='cell'>
 				<div style={{ width: '100%' }}>
-					<h2>Login (Admin)</h2>
+					<h2>Signup (Admin)</h2>
+					<div className='inputGroup'>
+						<label className='inputLabel'>Full Name</label>
+						<input
+							className='input'
+							type='text'
+							id='name'
+							name='name'
+							value={name}
+							onChange={(e) => setName(e.target.value)}
+						/>
+					</div>
+					<div className='inputGroup'>
+						<label className='inputLabel'>Email</label>
+						<input
+							className='input'
+							type='email'
+							id='email'
+							name='email'
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+						/>
+					</div>
+					<div className='inputGroup'>
+						<label className='inputLabel'>Phone Number</label>
+						<input
+							className='input'
+							type='number'
+							id='phoneNumber'
+							name='phoneNumber'
+							value={phoneNumber}
+							onChange={(e) => setPhoneNumber(e.target.value)}
+						/>
+					</div>
 					<div className='inputGroup'>
 						<label className='inputLabel'>Username</label>
 						<input
@@ -106,14 +151,14 @@ function AdminLogin() {
 						Submit
 					</button>
 					<div className='spaceBetween'>
-						<Link href='/Admin/adminSignup'>
-							<a className='link'>Signup</a>
-						</Link>
-						<Link href='/Buyer/buyerLogin'>
-							<a className='link'>Customer?</a>
+						<Link href='/Admin/adminLogin'>
+							<a className='link'>Login</a>
 						</Link>
 						<Link href='/Seller/sellerLogin'>
 							<a className='link'>Seller?</a>
+						</Link>
+						<Link href='/Buyer/buyerLogin'>
+							<a className='link'>Buyer?</a>
 						</Link>
 					</div>
 				</div>
@@ -122,4 +167,4 @@ function AdminLogin() {
 	);
 }
 
-export default AdminLogin;
+export default AdminSignup;

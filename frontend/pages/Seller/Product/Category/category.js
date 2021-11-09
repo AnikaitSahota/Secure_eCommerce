@@ -1,12 +1,12 @@
-import SellerNavbar from '../../../components/SellerNavbar';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import SellerProductCard from '../../../components/SellerProductCard';
-import api from '../../api';
+import SellerCategoryCard from '../../../../components/SellerCategoryCard';
+import SellerNavbar from '../../../../components/SellerNavbar';
+import api from '../../../api';
 
-function Product() {
+function ProductCategories() {
 	const router = useRouter();
-	const [products, setProducts] = useState([]);
+	const [categories, setCategories] = useState([]);
 
 	useEffect(() => {
 		const cookie = document.cookie;
@@ -23,7 +23,7 @@ function Product() {
 		}
 
 		const body = { token: tokenTemp, username: usernameTemp };
-		fetch(`${api}/seller/get-products/`, {
+		fetch(`${api}/seller/get-categories/`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -33,41 +33,23 @@ function Product() {
 			.then((res) => res.json())
 			.then((res) => {
 				if (res.status == 'success') {
-					setProducts(res.data);
+					setCategories(res.data);
 				} else {
 					alert(res.status);
 				}
 			});
 	}, []);
 
-	useEffect(() => {
-		setProducts((prev) => prev);
-	}, [products]);
-
-	function addProduct() {
-		router.push(`/Seller/Product/addProduct`);
-	}
-
 	return (
 		<div>
 			<SellerNavbar />
 			<div className='content'>
-				<button className='addProduct' onClick={(e) => addProduct()}>
-					Add Product
-				</button>
-				{products.map((e, i) => {
-					return (
-						<SellerProductCard
-							key={i}
-							productName={e.name}
-							productDescription={e.description}
-							productId={e.id}
-						/>
-					);
+				{categories.map((e, i) => {
+					return <SellerCategoryCard categoryName={e.name} key={i} />;
 				})}
 			</div>
 		</div>
 	);
 }
 
-export default Product;
+export default ProductCategories;

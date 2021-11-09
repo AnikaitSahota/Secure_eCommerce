@@ -12,7 +12,10 @@ function usernameCheck(username) {
 	if (pattern.test(username)) {
 		return [true, 'Username Checked'];
 	} else {
-		return [false, 'Username does not follow standards.'];
+		return [
+			false,
+			'Username must have: capital letter, small letter and number',
+		];
 	}
 }
 
@@ -23,7 +26,10 @@ function passwordCheck(password) {
 	if (pattern.test(password)) {
 		return [true, 'Password Checked'];
 	} else {
-		return [false, 'Password does not meet standards.'];
+		return [
+			false,
+			'Password must have: capital letter, small letter, number and special character',
+		];
 	}
 }
 

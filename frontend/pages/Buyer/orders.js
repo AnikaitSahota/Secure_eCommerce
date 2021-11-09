@@ -1,13 +1,14 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import BuyerNavbar from '../../../components/BuyerNavbar';
-import BuyerProductCard from '../../../components/BuyerProductCard';
-import api from '../../api';
+import BuyerNavbar from '../../components/BuyerNavbar';
+import api from '../api';
+import BuyerOrder from '../../components/BuyerOrders';
 
-function Product() {
+function Orders() {
 	const router = useRouter();
-	const [products, setProducts] = useState([]);
+	const [orders, setOrders] = useState([]);
 	const [token, setToken] = useState('');
+	const [type, setType] = useState('');
 	const [username, setUsername] = useState('');
 
 	useEffect(() => {
@@ -20,17 +21,25 @@ function Product() {
 			var typeTemp = cookies.type;
 			var usernameTemp = cookies.username;
 			setToken(tokenTemp);
+			setType(typeTemp);
 			setUsername(usernameTemp);
 			if (typeTemp !== 'buyer') {
 				router.push('/');
 			}
 		}
 
-		fetch(`${api}/product/all-products/`)
+		const body = { token: tokenTemp, username: usernameTemp };
+		fetch(`${api}/customer/order-history/`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(body),
+		})
 			.then((res) => res.json())
 			.then((res) => {
 				if (res.status == 'success') {
-					setProducts(res.data);
+					setOrders(res.data);
 				} else {
 					alert(res.status);
 				}
@@ -41,14 +50,14 @@ function Product() {
 		<div>
 			<BuyerNavbar />
 			<div className='content'>
-				{products.map((e, i) => {
+				{orders.map((e, i) => {
 					return (
-						<BuyerProductCard
+						<BuyerOrder
 							key={i}
-							productName={e.name}
-							productDescription={e.description}
-							productId={e.id}
-							productImg1={e.img1}
+							orderName={e.product_name}
+							orderQuantity={e.quantity}
+							orderAmount={e.total_amount}
+							orderTime={e.time_of_creation}
 						/>
 					);
 				})}
@@ -57,4 +66,4 @@ function Product() {
 	);
 }
 
-export default Product;
+export default Orders;

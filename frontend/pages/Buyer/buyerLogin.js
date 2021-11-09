@@ -1,12 +1,30 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as checks from '../../components/LoginCheck';
+import api from '../api';
 
 function BuyerLogin() {
 	const router = useRouter();
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
+
+	useEffect(() => {
+		const cookie = document.cookie;
+		if (cookie) {
+			var cookies = JSON.parse(cookie.split('=')[1]);
+			var tokenTemp = cookies.token;
+			var typeTemp = cookies.type;
+			var usernameTemp = cookies.username;
+			if (typeTemp == 'seller') {
+				router.push('/Seller/Product/product');
+			} else if (typeTemp == 'admin') {
+				router.push('/Admin/Verify/product');
+			} else if (typeTemp == 'buyer') {
+				router.push('/Buyer/Product/product');
+			}
+		}
+	}, []);
 
 	function myTrim() {
 		setUsername(username.trim());
@@ -21,15 +39,33 @@ function BuyerLogin() {
 			if (usernameChecked[0]) {
 				const passwordChecked = checks.passwordCheck(password);
 				if (passwordChecked[0]) {
-					router.push(`/Buyer/Product/product`);
+					const body = { username: username, password: password };
+					fetch(`${api}/customer/login/`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(body),
+					})
+						.then((res) => res.json())
+						.then((res) => {
+							if (res.status == 'success') {
+								const date = new Date();
+								date.setDate(date.getDate() + 1);
+								document.cookie = `info={ "token" : "${res.token}", "type" : "buyer", "username" : "${username}"}; expires = ${date}`;
+								router.push(`/Buyer/Product/product`);
+							} else {
+								alert(res.status);
+							}
+						});
 				} else {
-					console.log(passwordChecked[1]);
+					alert(passwordChecked[1]);
 				}
 			} else {
-				console.log(usernameChecked[1]);
+				alert(usernameChecked[1]);
 			}
 		} else {
-			console.log(lengthChecked[1]);
+			alert(lengthChecked[1]);
 		}
 	}
 

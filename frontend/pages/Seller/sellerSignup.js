@@ -1,68 +1,90 @@
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import * as checks from '../../components/LoginCheck';
 import api from '../api';
 
 function SellerSignup() {
+	const router = useRouter();
 	const [name, setName] = useState('');
 	const [email, setEmail] = useState('');
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
-	const [phoneNumber, setPhoneNumber] = useState(0);
+	const [phoneNumber, setPhoneNumber] = useState('');
+
+	useEffect(() => {
+		const cookie = document.cookie;
+		if (cookie) {
+			var cookies = JSON.parse(cookie.split('=')[1]);
+			var tokenTemp = cookies.token;
+			var typeTemp = cookies.type;
+			var usernameTemp = cookies.username;
+			if (typeTemp == 'seller') {
+				router.push('/Seller/Product/product');
+			} else if (typeTemp == 'admin') {
+				router.push('/Admin/Verify/product');
+			} else if (typeTemp == 'buyer') {
+				router.push('/Buyer/Product/product');
+			}
+		}
+	}, []);
 
 	function myTrim() {
 		setUsername(username.trim());
 		setPassword(password.trim());
+		setName(name.trim());
+		setPhoneNumber(phoneNumber.trim());
+		setEmail(email.trim());
 	}
 
 	function securityCheck() {
-		const body = {
-			user_name: 'PraphullBoy56',
-			email_id: 'praphull.pd@gmail.com',
-		};
-		console.log(JSON.stringify(body));
-		fetch(`${api}/signup/seller`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Access-Control-Allow-Origin': '*',
-			},
-			body: JSON.stringify(body),
-		})
-			.then((res) => res.json())
-			.then((res) => console.log(res));
-		// myTrim();
-		// const lengthChecked = checks.lengthCheck(username, password);
-		// if (lengthChecked[0]) {
-		// 	const usernameChecked = checks.usernameCheck(username);
-		// 	if (usernameChecked[0]) {
-		// 		const passwordChecked = checks.passwordCheck(password);
-		// 		if (passwordChecked[0]) {
-		// 			const body = { user_name: username, email: email };
-		// 			fetch(`${api}/signup/seller`, {
-		// 				method: 'POST',
-		// 				headers: {
-		// 					'Content-Type': 'application/json',
-		// 				},
-		// 				body: JSON.stringify(body),
-		// 			})
-		// 				.then((res) => res.json())
-		// 				.then((res) => console.log(res));
-		// 		} else {
-		// 			console.log(passwordChecked[1]);
-		// 		}
-		// 	} else {
-		// 		console.log(usernameChecked[1]);
-		// 	}
-		// } else {
-		// 	console.log(lengthChecked[1]);
-		// }
+		myTrim();
+		const lengthChecked = checks.lengthCheck(username, password);
+		if (lengthChecked[0]) {
+			const usernameChecked = checks.usernameCheck(username);
+			if (usernameChecked[0]) {
+				const passwordChecked = checks.passwordCheck(password);
+				if (passwordChecked[0]) {
+					const body = {
+						name: name,
+						username: username,
+						email_id: email,
+						password: password,
+						contact_number: phoneNumber,
+					};
+					fetch(`${api}/seller/signup/`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(body),
+					})
+						.then((res) => res.json())
+						.then((res) => {
+							if (res.status == 'success') {
+								const date = new Date();
+								date.setDate(date.getMinutes() + 10);
+								document.cookie = `email=${email}; expires=${date};`;
+								router.push(`/Seller/sellerSignupOTP`);
+							} else {
+								alert(res.status);
+							}
+						});
+				} else {
+					alert(passwordChecked[1]);
+				}
+			} else {
+				alert(usernameChecked[1]);
+			}
+		} else {
+			alert(lengthChecked[1]);
+		}
 	}
 
 	return (
 		<div className='centerScreenContainer'>
 			<div className='cell'>
-				<div style={{ width: '100%' }} method='POST'>
+				<div style={{ width: '100%' }}>
 					<h2>Signup (Seller)</h2>
 					<div className='inputGroup'>
 						<label className='inputLabel'>Full Name</label>

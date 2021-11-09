@@ -1,21 +1,42 @@
 import Link from 'next/link';
-import router, { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import * as checks from '../../components/LoginCheck';
+import api from '../api';
 
 function BuyerSignup() {
 	const router = useRouter();
-	const [username, setUsername] = useState('');
-	const [password, setPassword] = useState('');
 	const [name, setName] = useState('');
 	const [email, setEmail] = useState('');
-	const [phoneNumber, setPhoneNumber] = useState(0);
+	const [username, setUsername] = useState('');
+	const [password, setPassword] = useState('');
+	const [phoneNumber, setPhoneNumber] = useState('');
+	const [address, setAddress] = useState('');
+
+	useEffect(() => {
+		const cookie = document.cookie;
+		if (cookie) {
+			var cookies = JSON.parse(cookie.split('=')[1]);
+			var tokenTemp = cookies.token;
+			var typeTemp = cookies.type;
+			var usernameTemp = cookies.username;
+			if (typeTemp == 'seller') {
+				router.push('/Seller/Product/product');
+			} else if (typeTemp == 'admin') {
+				router.push('/Admin/Verify/product');
+			} else if (typeTemp == 'buyer') {
+				router.push('/Buyer/Product/product');
+			}
+		}
+	}, []);
 
 	function myTrim() {
 		setUsername(username.trim());
 		setPassword(password.trim());
 		setName(name.trim());
+		setPhoneNumber(phoneNumber.trim());
 		setEmail(email.trim());
+		setAddress(address.trim());
 	}
 
 	function securityCheck() {
@@ -26,15 +47,40 @@ function BuyerSignup() {
 			if (usernameChecked[0]) {
 				const passwordChecked = checks.passwordCheck(password);
 				if (passwordChecked[0]) {
-					router.push(`/Buyer/buyerLogin`);
+					const body = {
+						name: name,
+						username: username,
+						email_id: email,
+						password: password,
+						address: address,
+						contact_number: phoneNumber,
+					};
+					fetch(`${api}/customer/signup/`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(body),
+					})
+						.then((res) => res.json())
+						.then((res) => {
+							if (res.status == 'success') {
+								const date = new Date();
+								date.setDate(date.getMinutes() + 10);
+								document.cookie = `email=${email}; expires=${date};`;
+								router.push(`/Buyer/buyerSignupOTP`);
+							} else {
+								alert(res.status);
+							}
+						});
 				} else {
-					console.log(passwordChecked[1]);
+					alert(passwordChecked[1]);
 				}
 			} else {
-				console.log(usernameChecked[1]);
+				alert(usernameChecked[1]);
 			}
 		} else {
-			console.log(lengthChecked[1]);
+			alert(lengthChecked[1]);
 		}
 	}
 
@@ -73,7 +119,7 @@ function BuyerSignup() {
 							id='phoneNumber'
 							name='phoneNumber'
 							value={phoneNumber}
-							onChange={(e) => setPhoneNumber(phoneNumber)}
+							onChange={(e) => setPhoneNumber(e.target.value)}
 						/>
 					</div>
 					<div className='inputGroup'>
@@ -96,6 +142,16 @@ function BuyerSignup() {
 							name='password'
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
+						/>
+					</div>
+					<div className='inputGroup'>
+						<label className='inputLabel'>Address</label>
+						<textarea
+							className='input'
+							id='address'
+							name='address'
+							value={address}
+							onChange={(e) => setAddress(e.target.value)}
 						/>
 					</div>
 					<button

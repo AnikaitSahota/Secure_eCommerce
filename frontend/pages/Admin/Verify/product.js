@@ -1,14 +1,12 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import BuyerNavbar from '../../../components/BuyerNavbar';
-import BuyerProductCard from '../../../components/BuyerProductCard';
+import AdminNavbar from '../../../components/AdminNavbar';
+import AdminProductCard from '../../../components/AdminProductCard';
 import api from '../../api';
 
 function Product() {
 	const router = useRouter();
 	const [products, setProducts] = useState([]);
-	const [token, setToken] = useState('');
-	const [username, setUsername] = useState('');
 
 	useEffect(() => {
 		const cookie = document.cookie;
@@ -19,13 +17,13 @@ function Product() {
 			var tokenTemp = cookies.token;
 			var typeTemp = cookies.type;
 			var usernameTemp = cookies.username;
-			setToken(tokenTemp);
-			setUsername(usernameTemp);
-			if (typeTemp !== 'buyer') {
+			if (typeTemp !== 'admin') {
 				router.push('/');
 			}
 		}
+	}, []);
 
+	useEffect(() => {
 		fetch(`${api}/product/all-products/`)
 			.then((res) => res.json())
 			.then((res) => {
@@ -37,18 +35,21 @@ function Product() {
 			});
 	}, []);
 
+	useEffect(() => {
+		setProducts((prev) => prev);
+	}, [products]);
+
 	return (
 		<div>
-			<BuyerNavbar />
+			<AdminNavbar />
 			<div className='content'>
 				{products.map((e, i) => {
 					return (
-						<BuyerProductCard
+						<AdminProductCard
 							key={i}
 							productName={e.name}
 							productDescription={e.description}
 							productId={e.id}
-							productImg1={e.img1}
 						/>
 					);
 				})}
