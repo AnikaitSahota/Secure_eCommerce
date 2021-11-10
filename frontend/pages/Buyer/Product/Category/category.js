@@ -22,19 +22,18 @@ function ProductCategories() {
 					if (typeTemp !== 'buyer') {
 						router.push('/');
 					}
-
-					fetch(`${api}/product/all-categories/`)
-						.then((res) => res.json())
-						.then((res) => {
-							if (res.status == 'success') {
-								setCategories(res.data);
-							} else {
-								alert(res.status);
-							}
-						});
 				}
 			}
 		}
+		fetch(`${api}/product/all-categories/`)
+			.then((res) => res.json())
+			.then((res) => {
+				if (res.status == 'success') {
+					setCategories(res.data);
+				} else {
+					alert(res.status);
+				}
+			});
 	}, []);
 
 	return (

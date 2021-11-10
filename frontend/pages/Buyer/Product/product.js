@@ -28,19 +28,18 @@ function Product() {
 					if (typeTemp !== 'buyer') {
 						router.push('/');
 					}
-
-					fetch(`${api}/product/all-products/`)
-						.then((res) => res.json())
-						.then((res) => {
-							if (res.status == 'success') {
-								setProducts(res.data);
-							} else {
-								alert(res.status);
-							}
-						});
 				}
 			}
 		}
+		fetch(`${api}/product/all-products/`)
+			.then((res) => res.json())
+			.then((res) => {
+				if (res.status == 'success') {
+					setProducts(res.data);
+				} else {
+					alert(res.status);
+				}
+			});
 	}, []);
 
 	return (
