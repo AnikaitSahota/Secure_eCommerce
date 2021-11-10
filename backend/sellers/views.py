@@ -7,7 +7,8 @@ from products.models import Product, Category
 from products.serializers import ProductSerializerFew, CategorySerializerFew
 from .serializers import SellerSerializer
 from rest_framework import status
-from entities import get_OTP, get_tokken
+from django.db.models import Q
+from entities import get_OTP, get_tokken, username_verification, password_verification
 from datetime import datetime, timedelta, timezone
 from django.conf import settings
 import json
@@ -34,7 +35,13 @@ def verify_token(seller, request):
 class GetAllProducts(APIView):
     def post(self, request):
         print(request.data)
-        seller = Seller.objects.get(username=request.data["username"])
+        if(not {'username', 'token'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            seller = Seller.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Seller not found"}, status=status.HTTP_400_BAD_REQUEST)
         if (not verify_token(seller, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
         if (not is_verified(seller, request)):
@@ -47,14 +54,22 @@ class GetAllProducts(APIView):
 class GetSpecificProducts(APIView):
     def post(self, request):
         print(request.data)
-        seller = Seller.objects.get(username=request.data["username"])
+        if(not {'username', 'token', 'category_name'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            seller = Seller.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Seller not found"}, status=status.HTTP_400_BAD_REQUEST)
         if (not verify_token(seller, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
         if (not is_verified(seller, request)):
             return Response({"status": "Seller Not Verified"}, status=status.HTTP_200_OK)
-        products = Product.objects.filter(seller=seller,
-                                          category=Category.objects
-                                          .get(name=request.data['category_name']))
+        try:
+            category = Category.objects.get(name=request.data['category_name'])
+        except:
+            return Response({"status": "Category not found"}, status=status.HTTP_400_BAD_REQUEST)
+        products = Product.objects.filter(seller=seller, category=category)
         serializer = ProductSerializerFew(products, many=True)
         return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
 
@@ -62,12 +77,21 @@ class GetSpecificProducts(APIView):
 class ViewProduct(APIView):
     def post(self, request):
         print(request.data)
-        seller = Seller.objects.get(username=request.data["username"])
+        if(not {'username', 'token', 'id'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            seller = Seller.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Seller not found"}, status=status.HTTP_400_BAD_REQUEST)
         if (not verify_token(seller, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
         if (not is_verified(seller, request)):
             return Response({"status": "Seller Not Verified"}, status=status.HTTP_200_OK)
-        product = Product.objects.get(id=request.data['id'])
+        try:
+            product = Product.objects.get(id=request.data['id'])
+        except:
+            return Response({"status": "Product not found"}, status=status.HTTP_400_BAD_REQUEST)
         product_dict = {'id': product.id,
                         'name': product.name,
                         'img1': product.img1,
@@ -85,30 +109,42 @@ class ViewProduct(APIView):
 class EditProduct(APIView):
     def put(self, request):
         print(request.data)
-        seller = Seller.objects.get(username=request.data["username"])
+        if(not {'username', 'token', 'id', 'description',
+                'inventory', 'price', 'img1', 'img2'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            seller = Seller.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Seller not found"}, status=status.HTTP_400_BAD_REQUEST)
         if (not verify_token(seller, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
         if (not is_verified(seller, request)):
             return Response({"status": "Seller Not Verified"}, status=status.HTTP_200_OK)
-        product = Product.objects.get(id=request.data['id'])
-        if 'description' in request.data:
-            product.description = request.data['description']
-        if 'inventory' in request.data:
-            product.inventory = request.data['inventory']
-        if 'price' in request.data:
-            product.price = request.data['price']
-        if 'img1' in request.data:
-            product.img1 = request.data['img1']
-        if 'img2' in request.data:
-            product.img2 = request.data['img2']
-        product.save()
+        try:
+            product = Product.objects.get(id=request.data['id'])
+        except:
+            return Response({"status": "Product not found"}, status=status.HTTP_400_BAD_REQUEST)
+        product.description = request.data['description']
+        product.inventory = request.data['inventory']
+        product.price = request.data['price']
+        product.img1 = request.data['img1']
+        product.img2 = request.data['img2']
+        product.save(update_fields=['description',
+                     'inventory', 'price', 'img1', 'img2'])
         return Response({"status": "success"}, status=status.HTTP_200_OK)
 
 
 class GetAllCategories(APIView):
     def post(self, request):
         print(request.data)
-        seller = Seller.objects.get(username=request.data["username"])
+        if(not {'username', 'token'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            seller = Seller.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Seller not found"}, status=status.HTTP_400_BAD_REQUEST)
         if (not verify_token(seller, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
         if (not is_verified(seller, request)):
@@ -121,7 +157,14 @@ class GetAllCategories(APIView):
 class AddProduct(APIView):
     def post(self, request):
         print(request.data)
-        seller = Seller.objects.get(username=request.data["username"])
+        if(not {'username', 'token', 'name', 'img1', 'img2',
+                'description', 'category', 'inventory', 'price'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            seller = Seller.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Seller not found"}, status=status.HTTP_400_BAD_REQUEST)
         if (not verify_token(seller, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
         if (not is_verified(seller, request)):
@@ -143,7 +186,13 @@ class AddProduct(APIView):
 class GetSellerDetails(APIView):
     def post(self, request):
         print(request.data)
-        seller = Seller.objects.get(username=request.data["username"])
+        if(not {'username', 'token'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            seller = Seller.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Seller not found"}, status=status.HTTP_400_BAD_REQUEST)
         if (not verify_token(seller, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
         serializer = SellerSerializer(seller)
@@ -153,14 +202,18 @@ class GetSellerDetails(APIView):
 class UpdateSellerDetails(APIView):
     def put(self, request):
         print(request.data)
-        seller = Seller.objects.get(username=request.data["username"])
+        if(not {'username', 'token', 'name', 'contact_number'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            seller = Seller.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Seller not found"}, status=status.HTTP_400_BAD_REQUEST)
         if (not verify_token(seller, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
-        if ('name' in request.data):
-            seller.name = request.data['name']
-        if ('contact_number' in request.data):
-            seller.contact_number = request.data['contact_number']
-        seller.save()
+        seller.name = request.data['name']
+        seller.contact_number = request.data['contact_number']
+        seller.save(update_fields=['name', 'contact_number'])
         return Response({"status": "success"}, status=status.HTTP_200_OK)
 
 
@@ -169,7 +222,15 @@ class SellerSignUpView(APIView):
         if(not {'username', 'email_id', 'name',
                 'password', 'contact_number'}.issubset(request.data.keys())):
             return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
-
+        if (not (username_verification(request.data['username']))):
+            return Response({"status": "Username doesn't meet the requirements"}, status=status.HTTP_400_BAD_REQUEST)
+        if (not (password_verification(request.data['password']))):
+            return Response({"status": "Password doesn't meet the requirements"}, status=status.HTTP_400_BAD_REQUEST)
+        if (Seller.objects.filter(Q(name=request.data['username']) |
+                                  Q(email_id=request.data['email_id']) |
+                                  Q(contact_number=request.data['contact_number'])).exists()):
+            return Response({"status": "Admin with this username, email_id or contact_number already exists!"},
+                            status=status.HTTP_400_BAD_REQUEST)
         try:
             OTP = get_OTP()
             message = 'Hi ' + request.data['username'] + '\n' + \
@@ -206,7 +267,9 @@ class SellerOTPverification(APIView):
         status_msg = 'success'
         if(not {'email_id', 'OTP'}.issubset(request.data.keys())):
             return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
-
+        expired_OTP_tuples = Seller_OTP.objects.filter(time_of_creation__lt=(
+            datetime.now(timezone.utc) - timedelta(minutes=settings.OTP_TIME_WINDOW)))
+        expired_OTP_tuples.delete()
         try:
             OTP_tuple = Seller_OTP.objects.filter(
                 email_id=request.data['email_id']).order_by('-time_of_creation')[0]
@@ -232,9 +295,6 @@ class SellerOTPverification(APIView):
                 raise Exception  # wrong OTP
         except Exception as exp:
             print(exp)
-            expired_OTP_tuples = Seller_OTP.objects.filter(time_of_creation__lt=(
-                datetime.now(timezone.utc) - timedelta(minutes=settings.OTP_TIME_WINDOW)))
-            expired_OTP_tuples.delete()
             return Response({"status": status_msg}, status=status.HTTP_200_OK)
 
 
@@ -248,7 +308,13 @@ class SellerAuthenticationView(APIView):
                                   password=sha256(bytes(request.data['password'], 'utf-8')).hexdigest())).exists():
 
             current_token = get_tokken()
-            seller = Seller.objects.get(username=request.data['username'])
+            try:
+                seller = Seller.objects.get(username=request.data['username'])
+            except Exception as exp:
+                print(exp)
+                return Response({"status": "error"},
+                                status=status.HTTP_400_BAD_REQUEST)
+
             new_tuple = Seller_Session(seller=seller, token=current_token)
             new_tuple.save()
 
@@ -261,9 +327,22 @@ class SellerAuthenticationView(APIView):
 class SellerLogoutView(APIView):
     def post(self, request):
         print(request.data)
-        seller = Seller.objects.get(username=request.data["username"])
+        if(not {'username', 'token'}.issubset(request.data.keys())):
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            seller = Seller.objects.get(username=request.data["username"])
+        except Exception as exp:
+            print(exp)
+            return Response({"status": "Seller not found"}, status=status.HTTP_400_BAD_REQUEST)
         if (not verify_token(seller, request)):
             return Response({"status": "Unsuccessful"}, status=status.HTTP_200_OK)
-        seller_sessions = Seller_Session.objects.filter(seller=seller)
-        seller_sessions.delete()
+        try:
+            seller_session = Seller_Session.objects.get(
+                seller=seller, token=request.data['token'])
+        except Exception as exp:
+            return Response({"status": "error"}, status=status.HTTP_400_BAD_REQUEST)
+        seller_session.delete()
+        expired_sessions = Seller_Session.objects.filter(time_of_creation__lt=(
+            datetime.now(timezone.utc) - timedelta(minutes=settings.SESSION_TIME_WINDOW)))
+        expired_sessions.delete()
         return Response({"status": "success"}, status=status.HTTP_200_OK)
