@@ -28,30 +28,30 @@ function BuyerCategoryAccount() {
 						if (typeTemp !== 'buyer') {
 							router.push('/');
 						}
+
+						const body = {
+							token: tokenTemp,
+							username: usernameTemp,
+							category_name: category_name,
+						};
+						fetch(`${api}/product/specific-category/`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify(body),
+						})
+							.then((res) => res.json())
+							.then((res) => {
+								if (res.status == 'success') {
+									setProducts(res.data);
+								} else {
+									alert(res.status);
+								}
+							});
 					}
 				}
 			}
-
-			const body = {
-				token: tokenTemp,
-				username: usernameTemp,
-				category_name: category_name,
-			};
-			fetch(`${api}/product/specific-category/`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(body),
-			})
-				.then((res) => res.json())
-				.then((res) => {
-					if (res.status == 'success') {
-						setProducts(res.data);
-					} else {
-						alert(res.status);
-					}
-				});
 		}
 	});
 

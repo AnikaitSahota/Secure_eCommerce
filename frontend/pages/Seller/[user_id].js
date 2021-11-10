@@ -32,30 +32,30 @@ function SellerAccount() {
 					if (typeTemp !== 'seller') {
 						router.push('/');
 					}
+
+					const body = { token: tokenTemp, username: usernameTemp };
+					fetch(`${api}/seller/get-seller-details/`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(body),
+					})
+						.then((res) => res.json())
+						.then((res) => {
+							if (res.status == 'success') {
+								setName(res.data.name);
+								setEmail(res.data.email_id);
+								setPhoneNumber(res.data.contact_number);
+								setVerified(res.data.verified);
+								setUsername(res.data.username);
+							} else {
+								alert(res.status);
+							}
+						});
 				}
 			}
 		}
-
-		const body = { token: tokenTemp, username: usernameTemp };
-		fetch(`${api}/seller/get-seller-details/`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(body),
-		})
-			.then((res) => res.json())
-			.then((res) => {
-				if (res.status == 'success') {
-					setName(res.data.name);
-					setEmail(res.data.email_id);
-					setPhoneNumber(res.data.contact_number);
-					setVerified(res.data.verified);
-					setUsername(res.data.username);
-				} else {
-					alert(res.status);
-				}
-			});
 	}, []);
 
 	function myTrim() {

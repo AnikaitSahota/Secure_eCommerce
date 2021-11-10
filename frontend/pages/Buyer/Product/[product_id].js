@@ -38,35 +38,35 @@ function BuyerProductSingle() {
 						var usernameTemp = cookies.username;
 						setToken(tokenTemp);
 						setUsername(usernameTemp);
+
+						const body = {
+							id: product_id,
+						};
+						fetch(`${api}/product/specific-product/`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify(body),
+						})
+							.then((res) => res.json())
+							.then((res) => {
+								if (res.status == 'success') {
+									const temp = JSON.parse(res.data);
+									setName(temp.name);
+									setPrice(temp.price);
+									setQuantity(temp.inventory);
+									setCategory(temp.category);
+									setDescription(temp.description);
+									setImg1(temp.img1);
+									setImg2(temp.img2);
+								} else {
+									alert(res.status);
+								}
+							});
 					}
 				}
 			}
-
-			const body = {
-				id: product_id,
-			};
-			fetch(`${api}/product/specific-product/`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(body),
-			})
-				.then((res) => res.json())
-				.then((res) => {
-					if (res.status == 'success') {
-						const temp = JSON.parse(res.data);
-						setName(temp.name);
-						setPrice(temp.price);
-						setQuantity(temp.inventory);
-						setCategory(temp.category);
-						setDescription(temp.description);
-						setImg1(temp.img1);
-						setImg2(temp.img2);
-					} else {
-						alert(res.status);
-					}
-				});
 		}
 	});
 
@@ -142,9 +142,7 @@ function BuyerProductSingle() {
 							className='addBalance'
 							style={{ marginBottom: '1rem' }}
 							onClick={(e) => {
-								alert(
-									`Your link is: http://localhost:3000${router.asPath}`
-								);
+								alert(`Your link is: ${api}${router.asPath}`);
 							}}
 						>
 							Get Share Link

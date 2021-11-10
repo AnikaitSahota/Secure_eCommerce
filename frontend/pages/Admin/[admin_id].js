@@ -32,26 +32,26 @@ function AdminAccount() {
 					if (typeTemp !== 'admin') {
 						router.push('/');
 					}
+
+					const body = { token: tokenTemp, username: usernameTemp };
+					fetch(`${api}/admin/get-admin-details/`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(body),
+					})
+						.then((res) => res.json())
+						.then((res) => {
+							if (res.status == 'success') {
+								setUser(res.data);
+							} else {
+								alert(res.status);
+							}
+						});
 				}
 			}
 		}
-
-		const body = { token: tokenTemp, username: usernameTemp };
-		fetch(`${api}/admin/get-admin-details/`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(body),
-		})
-			.then((res) => res.json())
-			.then((res) => {
-				if (res.status == 'success') {
-					setUser(res.data);
-				} else {
-					alert(res.status);
-				}
-			});
 	}, []);
 
 	useEffect(() => {

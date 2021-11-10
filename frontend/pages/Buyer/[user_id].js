@@ -36,31 +36,31 @@ function BuyerAccount() {
 					if (typeTemp !== 'buyer') {
 						router.push('/');
 					}
+
+					const body = { token: tokenTemp, username: usernameTemp };
+					fetch(`${api}/customer/get-customer-details/`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(body),
+					})
+						.then((res) => res.json())
+						.then((res) => {
+							if (res.status == 'success') {
+								setName(res.data.name);
+								setEmail(res.data.email_id);
+								setUsername(res.data.username);
+								setPhoneNumber(res.data.contact_number);
+								setAddress(res.data.address);
+								setBalance(res.balance);
+							} else {
+								alert(res.status);
+							}
+						});
 				}
 			}
 		}
-
-		const body = { token: tokenTemp, username: usernameTemp };
-		fetch(`${api}/customer/get-customer-details/`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(body),
-		})
-			.then((res) => res.json())
-			.then((res) => {
-				if (res.status == 'success') {
-					setName(res.data.name);
-					setEmail(res.data.email_id);
-					setUsername(res.data.username);
-					setPhoneNumber(res.data.contact_number);
-					setAddress(res.data.address);
-					setBalance(res.balance);
-				} else {
-					alert(res.status);
-				}
-			});
 	}, []);
 
 	function myTrim() {

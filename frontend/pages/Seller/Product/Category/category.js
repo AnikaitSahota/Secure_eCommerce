@@ -24,26 +24,26 @@ function ProductCategories() {
 					if (typeTemp !== 'seller') {
 						router.push('/');
 					}
+
+					const body = { token: tokenTemp, username: usernameTemp };
+					fetch(`${api}/seller/get-categories/`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(body),
+					})
+						.then((res) => res.json())
+						.then((res) => {
+							if (res.status == 'success') {
+								setCategories(res.data);
+							} else {
+								alert(res.status);
+							}
+						});
 				}
 			}
 		}
-
-		const body = { token: tokenTemp, username: usernameTemp };
-		fetch(`${api}/seller/get-categories/`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(body),
-		})
-			.then((res) => res.json())
-			.then((res) => {
-				if (res.status == 'success') {
-					setCategories(res.data);
-				} else {
-					alert(res.status);
-				}
-			});
 	}, []);
 
 	return (

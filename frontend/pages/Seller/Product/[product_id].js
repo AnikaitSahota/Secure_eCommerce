@@ -40,54 +40,57 @@ function Product({ props }) {
 						if (typeTemp !== 'seller') {
 							router.push('/');
 						}
+
+						const body = {
+							token: tokenTemp,
+							username: usernameTemp,
+						};
+						fetch(`${api}/seller/get-categories/`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify(body),
+						})
+							.then((res) => res.json())
+							.then((res) => {
+								if (res.status == 'success') {
+									setCategories(res.data);
+								} else {
+									alert(res.status);
+								}
+							});
+
+						const body2 = {
+							token: tokenTemp,
+							username: usernameTemp,
+							id: product_id,
+						};
+						fetch(`${api}/seller/view-product/`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify(body2),
+						})
+							.then((res) => res.json())
+							.then((res) => {
+								if (res.status == 'success') {
+									const temp = JSON.parse(res.data);
+									setName(temp.name);
+									setDescription(temp.description);
+									setCategory(temp.category);
+									setQuantity(temp.inventory);
+									setPrice(temp.price);
+									setImg1(temp.img1);
+									setImg2(temp.img2);
+								} else {
+									alert(res.status);
+								}
+							});
 					}
 				}
 			}
-
-			const body = { token: tokenTemp, username: usernameTemp };
-			fetch(`${api}/seller/get-categories/`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(body),
-			})
-				.then((res) => res.json())
-				.then((res) => {
-					if (res.status == 'success') {
-						setCategories(res.data);
-					} else {
-						alert(res.status);
-					}
-				});
-
-			const body2 = {
-				token: tokenTemp,
-				username: usernameTemp,
-				id: product_id,
-			};
-			fetch(`${api}/seller/view-product/`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(body2),
-			})
-				.then((res) => res.json())
-				.then((res) => {
-					if (res.status == 'success') {
-						const temp = JSON.parse(res.data);
-						setName(temp.name);
-						setDescription(temp.description);
-						setCategory(temp.category);
-						setQuantity(temp.inventory);
-						setPrice(temp.price);
-						setImg1(temp.img1);
-						setImg2(temp.img2);
-					} else {
-						alert(res.status);
-					}
-				});
 		}
 	});
 

@@ -24,21 +24,19 @@ function Product() {
 					if (typeTemp !== 'admin') {
 						router.push('/');
 					}
+
+					fetch(`${api}/product/all-products/`)
+						.then((res) => res.json())
+						.then((res) => {
+							if (res.status == 'success') {
+								setProducts(res.data);
+							} else {
+								alert(res.status);
+							}
+						});
 				}
 			}
 		}
-	}, []);
-
-	useEffect(() => {
-		fetch(`${api}/product/all-products/`)
-			.then((res) => res.json())
-			.then((res) => {
-				if (res.status == 'success') {
-					setProducts(res.data);
-				} else {
-					alert(res.status);
-				}
-			});
 	}, []);
 
 	useEffect(() => {

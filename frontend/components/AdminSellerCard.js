@@ -26,16 +26,16 @@ function AdminSellerCard({ name, verified, username, phone, email }) {
 					if (typeTemp !== 'admin') {
 						router.push('/');
 					}
+
+					if (verified) {
+						const box = document.getElementById(name);
+						box.style.backgroundColor = '#22dd22';
+
+						const buttons = box.getElementsByTagName('button');
+						buttons[0].style.display = 'none';
+					}
 				}
 			}
-		}
-
-		if (verified) {
-			const box = document.getElementById(name);
-			box.style.backgroundColor = '#22dd22';
-
-			const buttons = box.getElementsByTagName('button');
-			buttons[0].style.display = 'none';
 		}
 	}, []);
 
