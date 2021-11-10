@@ -7,25 +7,33 @@ function BuyerSignupOTP() {
 	const [otp, setOtp] = useState('');
 
 	function securityCheck() {
-		const email = document.cookie.split('=')[1];
-		const body = { email_id: email, OTP: otp };
-		fetch(`${api}/customer/OTPverification/`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(body),
-		})
-			.then((res) => res.json())
-			.then((res) => {
-				if (res.status == 'success') {
-					document.cookie =
-						'email=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-					router.push(`/Buyer/buyerLogin`);
-				} else {
-					alert(res.status);
+		const cookie = document.cookie;
+		if (cookie) {
+			const allCookies = cookie.split(';');
+			for (let i = 0; i < allCookies.length; i++) {
+				var [cookieName, cookieValue] = allCookies[i].split('=');
+				if (cookieName == 'email') {
+					const body = { email_id: cookieValue, OTP: otp };
+					fetch(`${api}/customer/OTPverification/`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(body),
+					})
+						.then((res) => res.json())
+						.then((res) => {
+							if (res.status == 'success') {
+								document.cookie =
+									'email=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+								router.push(`/Buyer/buyerLogin`);
+							} else {
+								alert(res.status);
+							}
+						});
 				}
-			});
+			}
+		}
 	}
 
 	useEffect(() => {

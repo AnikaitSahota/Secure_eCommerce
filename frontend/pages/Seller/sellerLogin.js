@@ -12,16 +12,22 @@ function SellerLogin() {
 	useEffect(() => {
 		const cookie = document.cookie;
 		if (cookie) {
-			var cookies = JSON.parse(cookie.split('=')[1]);
-			var tokenTemp = cookies.token;
-			var typeTemp = cookies.type;
-			var usernameTemp = cookies.username;
-			if (typeTemp == 'seller') {
-				router.push('/Seller/Product/product');
-			} else if (typeTemp == 'admin') {
-				router.push('/Admin/Verify/product');
-			} else if (typeTemp == 'buyer') {
-				router.push('/Buyer/Product/product');
+			const allCookies = cookie.split(';');
+			for (let i = 0; i < allCookies.length; i++) {
+				var [cookieName, cookieValue] = allCookies[i].split('=');
+				if (cookieName == 'info') {
+					var cookies = JSON.parse(cookieValue);
+					var tokenTemp = cookies.token;
+					var typeTemp = cookies.type;
+					var usernameTemp = cookies.username;
+					if (typeTemp == 'seller') {
+						router.push('/Seller/Product/product');
+					} else if (typeTemp == 'admin') {
+						router.push('/Admin/Verify/product');
+					} else if (typeTemp == 'buyer') {
+						router.push('/Buyer/Product/product');
+					}
+				}
 			}
 		}
 	}, []);

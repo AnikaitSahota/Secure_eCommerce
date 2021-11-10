@@ -16,15 +16,21 @@ function Orders() {
 		if (!cookie) {
 			router.push(`/`);
 		} else {
-			var cookies = JSON.parse(cookie.split('=')[1]);
-			var tokenTemp = cookies.token;
-			var typeTemp = cookies.type;
-			var usernameTemp = cookies.username;
-			setToken(tokenTemp);
-			setType(typeTemp);
-			setUsername(usernameTemp);
-			if (typeTemp !== 'buyer') {
-				router.push('/');
+			const allCookies = cookie.split(';');
+			for (let i = 0; i < allCookies.length; i++) {
+				var [cookieName, cookieValue] = allCookies[i].split('=');
+				if (cookieName == 'info') {
+					var cookies = JSON.parse(cookieValue);
+					var tokenTemp = cookies.token;
+					var typeTemp = cookies.type;
+					var usernameTemp = cookies.username;
+					setToken(tokenTemp);
+					setType(typeTemp);
+					setUsername(usernameTemp);
+					if (typeTemp !== 'buyer') {
+						router.push('/');
+					}
+				}
 			}
 		}
 
